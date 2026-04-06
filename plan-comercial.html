@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Farma POS | Plan Comercial</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="pos.css">
+  <style>
+    .doc-shell {
+      display: grid;
+      grid-template-columns: 330px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .doc-sidebar {
+      padding: 1.25rem;
+      border-right: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(16px);
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+    }
+
+    .doc-sidebar-card {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid var(--border);
+      border-radius: 1.5rem;
+      box-shadow: var(--shadow-soft);
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .doc-sidebar-card h2 {
+      margin: 0 0 .85rem;
+      font-size: .84rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+    }
+
+    .doc-nav,
+    .doc-action-grid,
+    .doc-kpi-grid,
+    .doc-grid {
+      display: grid;
+      gap: .75rem;
+    }
+
+    .doc-nav a,
+    .doc-action-btn {
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+      padding: .85rem .95rem;
+      border-radius: 1rem;
+      text-decoration: none;
+      font-weight: 800;
+      color: var(--text);
+      border: 1px solid var(--border);
+      background: #fff;
+    }
+
+    .doc-nav a:hover,
+    .doc-action-btn:hover {
+      color: var(--primary-dark);
+      border-color: rgba(255, 106, 61, .22);
+      background: rgba(255, 106, 61, .06);
+    }
+
+    .doc-action-btn.is-primary {
+      justify-content: center;
+      background: linear-gradient(135deg, #ff8358 0%, #ff6a3d 55%, #eb5227 100%);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 16px 30px rgba(255, 106, 61, .22);
+    }
+
+    .doc-action-btn.is-primary:hover {
+      color: #fff;
+    }
+
+    .doc-main {
+      padding: 1.5rem;
+    }
+
+    .doc-hero {
+      background: linear-gradient(135deg, #1d3a4f 0%, #275872 48%, #ff6a3d 100%);
+      color: #fff;
+      border-radius: 2rem;
+      padding: 1.6rem;
+      box-shadow: var(--shadow-strong);
+    }
+
+    .doc-hero p {
+      max-width: 62ch;
+      color: rgba(255, 255, 255, .82);
+      line-height: 1.8;
+    }
+
+    .doc-kpi-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin-top: 1rem;
+    }
+
+    .doc-kpi {
+      padding: 1rem 1.1rem;
+      border-radius: 1.2rem;
+      background: rgba(255, 255, 255, .12);
+      border: 1px solid rgba(255, 255, 255, .14);
+    }
+
+    .doc-kpi strong,
+    .doc-kpi span {
+      display: block;
+    }
+
+    .doc-kpi strong {
+      font-size: 1.2rem;
+      margin-bottom: .35rem;
+    }
+
+    .doc-kpi span {
+      color: rgba(255, 255, 255, .76);
+      line-height: 1.5;
+    }
+
+    .doc-grid {
+      margin-top: 1rem;
+    }
+
+    .doc-two-col {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .doc-note {
+      padding: 1rem 1.1rem;
+      border-radius: 1.25rem;
+      background: rgba(255, 106, 61, .08);
+      border: 1px solid rgba(255, 106, 61, .14);
+      color: #7f4a34;
+      line-height: 1.7;
+    }
+
+    .doc-list {
+      display: grid;
+      gap: .75rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .doc-list li {
+      display: grid;
+      grid-template-columns: 2.2rem minmax(0, 1fr);
+      gap: .9rem;
+      align-items: start;
+      padding: .95rem 1rem;
+      border-radius: 1rem;
+      background: var(--soft);
+      border: 1px solid var(--border);
+    }
+
+    .doc-step {
+      width: 2.2rem;
+      height: 2.2rem;
+      display: grid;
+      place-items: center;
+      border-radius: .9rem;
+      background: linear-gradient(135deg, #ff7b4f 0%, var(--primary) 55%, #e55328 100%);
+      color: #fff;
+      font-weight: 800;
+    }
+
+    .doc-table-wrap {
+      overflow: auto;
+      border-radius: 1.3rem;
+      border: 1px solid var(--border);
+    }
+
+    .doc-table-wrap table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+    }
+
+    .doc-table-wrap th,
+    .doc-table-wrap td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .doc-table-wrap th {
+      color: var(--muted);
+      font-size: .85rem;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    @media (max-width: 1080px) {
+      .doc-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .doc-sidebar {
+        position: static;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+      }
+    }
+
+    @media (max-width: 780px) {
+      .doc-kpi-grid,
+      .doc-two-col {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="doc-shell">
+    <aside class="doc-sidebar">
+      <div class="brand-box">
+        <img class="brand-logo" src="assets/logo/logo-farmapos.png" alt="Logo Farma POS">
+        <div>
+          <strong>Farma POS</strong>
+          <span>Sistema comercial</span>
+        </div>
+      </div>
+
+      <div class="doc-sidebar-card">
+        <h2>Documento</h2>
+        <div class="list-card">
+          <strong>Plan comercial</strong>
+          <span>Base de precios, activacion, renovacion y salida a mercado.</span>
+        </div>
+      </div>
+
+      <div class="doc-sidebar-card">
+        <h2>Secciones</h2>
+        <nav class="doc-nav">
+          <a href="#precios"><i class="bi bi-cash-coin"></i><span>Precios sugeridos</span></a>
+          <a href="#reglas"><i class="bi bi-shield-check"></i><span>Reglas comerciales</span></a>
+          <a href="#venta"><i class="bi bi-bag-check"></i><span>Proceso de venta</span></a>
+          <a href="#activacion"><i class="bi bi-lightning-charge"></i><span>Activacion</span></a>
+          <a href="#renovacion"><i class="bi bi-arrow-repeat"></i><span>Renovacion</span></a>
+          <a href="#soporte"><i class="bi bi-life-preserver"></i><span>Politica de soporte</span></a>
+        </nav>
+      </div>
+
+      <div class="doc-sidebar-card">
+        <h2>Navegacion</h2>
+        <div class="doc-action-grid">
+          <a class="doc-action-btn is-primary" href="configuracion.html"><i class="bi bi-arrow-left-circle"></i><span>Volver a Configuracion</span></a>
+          <a class="doc-action-btn" href="dashboard.html"><i class="bi bi-house-door"></i><span>Ir al Panel Principal</span></a>
+          <a class="doc-action-btn" href="manual-usuario.html"><i class="bi bi-journal-richtext"></i><span>Abrir Manual</span></a>
+          <a class="doc-action-btn" href="checklist-lanzamiento.html"><i class="bi bi-list-check"></i><span>Ver Checklist</span></a>
+        </div>
+      </div>
+    </aside>
+
+    <main class="doc-main">
+      <header class="app-topbar">
+        <div>
+          <p class="section-kicker">Documentacion interna</p>
+          <h1>Plan comercial</h1>
+        </div>
+      </header>
+
+      <section class="doc-hero">
+        <p class="section-kicker text-white-50">Venta y crecimiento</p>
+        <h2>Licencias por plan, equipos y renovaciones con una ruta clara para empezar a vender</h2>
+        <p>Esta vista resume lo que el equipo necesita para comercializar Farma POS sin improvisar: precios sugeridos, reglas, activacion, renovacion y soporte.</p>
+        <div class="doc-kpi-grid">
+          <div class="doc-kpi"><strong>3 planes</strong><span>Quincenal, mensual y anual.</span></div>
+          <div class="doc-kpi"><strong>1 licencia</strong><span>Siempre asociada a una empresa.</span></div>
+          <div class="doc-kpi"><strong>Equipos</strong><span>Controlados por maximo permitido en la licencia.</span></div>
+        </div>
+      </section>
+
+      <div class="doc-grid">
+        <section class="module-card" id="precios">
+          <div class="module-head">
+            <div>
+              <h2>Precios sugeridos</h2>
+              <p>Base inicial para salir al mercado y ajustar despues de los primeros clientes piloto.</p>
+            </div>
+          </div>
+          <div class="doc-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Plan</th>
+                  <th>Vigencia</th>
+                  <th>1 equipo</th>
+                  <th>2 equipos</th>
+                  <th>3 equipos</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Quincenal</td><td>15 dias</td><td>$35.000 COP</td><td>$55.000 COP</td><td>$75.000 COP</td></tr>
+                <tr><td>Mensual</td><td>30 dias aprox.</td><td>$60.000 COP</td><td>$85.000 COP</td><td>$110.000 COP</td></tr>
+                <tr><td>Anual</td><td>12 meses</td><td>$600.000 COP</td><td>$780.000 COP</td><td>$950.000 COP</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="module-card" id="reglas">
+          <div class="module-head">
+            <div>
+              <h2>Reglas comerciales</h2>
+              <p>Condiciones clave para licencias, roles y renovaciones.</p>
+            </div>
+          </div>
+          <div class="doc-two-col">
+            <div class="list-card">
+              <strong>Licencia por empresa</strong>
+              <span>Cada licencia pertenece a una empresa y controla equipos, vigencia y estado.</span>
+            </div>
+            <div class="list-card">
+              <strong>Renovacion por plan</strong>
+              <span>Quincenal, mensual o anual segun el plan guardado en la licencia.</span>
+            </div>
+            <div class="list-card">
+              <strong>Control de roles</strong>
+              <span>Solo `admin` y `operador` pueden crear, renovar o bloquear licencias.</span>
+            </div>
+            <div class="list-card">
+              <strong>Empresas protegidas</strong>
+              <span>Los roles de empresa no pueden administrar licencias ni equipos.</span>
+            </div>
+          </div>
+          <div class="doc-note mt-3">
+            Recomendacion: vender el plan anual como oferta principal y dejar quincenal y mensual como entrada o recuperacion.
+          </div>
+        </section>
+
+        <section class="module-card" id="venta">
+          <div class="module-head">
+            <div>
+              <h2>Proceso de venta</h2>
+              <p>Ruta simple para registrar empresa, licencia y accesos iniciales.</p>
+            </div>
+          </div>
+          <ul class="doc-list">
+            <li><span class="doc-step">1</span><div>Registrar prospecto y validar datos de contacto.</div></li>
+            <li><span class="doc-step">2</span><div>Definir plan, numero de equipos y valor comercial.</div></li>
+            <li><span class="doc-step">3</span><div>Crear la empresa en el sistema y luego su licencia.</div></li>
+            <li><span class="doc-step">4</span><div>Asignar licencia al equipo principal del cliente.</div></li>
+            <li><span class="doc-step">5</span><div>Crear usuarios iniciales: `admin_empresa`, `supervisor` y `cajero`.</div></li>
+            <li><span class="doc-step">6</span><div>Entregar acceso, manual y fecha de corte.</div></li>
+          </ul>
+        </section>
+
+        <section class="module-card" id="activacion">
+          <div class="module-head">
+            <div>
+              <h2>Flujo de activacion</h2>
+              <p>Checklist operativo para dejar el sistema funcionando en el primer equipo.</p>
+            </div>
+          </div>
+          <div class="doc-two-col">
+            <div class="list-card">
+              <strong>Antes de activar</strong>
+              <span>Instalar la app, validar MariaDB, revisar licencia y confirmar empresa asociada.</span>
+            </div>
+            <div class="list-card">
+              <strong>Despues de activar</strong>
+              <span>Configurar logo, NIT, datos del ticket y cargar inventario inicial.</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="module-card" id="renovacion">
+          <div class="module-head">
+            <div>
+              <h2>Flujo de renovacion</h2>
+              <p>Lo minimo que el equipo comercial debe revisar para renovar sin errores.</p>
+            </div>
+          </div>
+          <ul class="doc-list">
+            <li><span class="doc-step">1</span><div>Revisar licencias proximas a vencer.</div></li>
+            <li><span class="doc-step">2</span><div>Confirmar pago y plan comercial del cliente.</div></li>
+            <li><span class="doc-step">3</span><div>Renovar desde el panel de licencias.</div></li>
+            <li><span class="doc-step">4</span><div>Verificar nueva fecha de corte y estado activo.</div></li>
+            <li><span class="doc-step">5</span><div>Confirmar con el cliente que el acceso continua normal.</div></li>
+          </ul>
+        </section>
+
+        <section class="module-card" id="soporte">
+          <div class="module-head">
+            <div>
+              <h2>Politica sugerida de soporte</h2>
+              <p>Base simple para atender clientes mientras terminan de formalizar el servicio.</p>
+            </div>
+          </div>
+          <div class="doc-two-col">
+            <div class="list-card">
+              <strong>Horario base</strong>
+              <span>Lunes a sabado de 7:00 a.m. a 7:00 p.m.</span>
+            </div>
+            <div class="list-card">
+              <strong>Canales</strong>
+              <span>Ticket/chat interno como canal principal y WhatsApp como respaldo.</span>
+            </div>
+            <div class="list-card">
+              <strong>Alta prioridad</strong>
+              <span>Primera respuesta ideal en menos de 1 hora.</span>
+            </div>
+            <div class="list-card">
+              <strong>Prioridad media o baja</strong>
+              <span>Atencion en menos de 4 horas o dentro del mismo dia habil.</span>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

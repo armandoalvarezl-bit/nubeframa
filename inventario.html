@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Farma POS | Inventario</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="pos.css">
+</head>
+<body data-page="inventory">
+  <div class="app-shell">
+    <aside class="app-sidebar">
+      <div class="brand-box"><img class="brand-logo" src="assets/logo/logo-farmapos.png" alt="Logo Farma POS"><div><strong>Farma POS</strong><span>Sistema comercial</span></div></div>
+      <nav class="app-nav">
+        <a href="dashboard.html"><i class="bi bi-grid-1x2-fill"></i><span>Inicio</span></a>
+        <a href="ventas.html"><i class="bi bi-receipt-cutoff"></i><span>Ventas</span></a>
+        <a href="historico-ventas.html"><i class="bi bi-clock-history"></i><span>Historico ventas</span></a>
+        <a href="retiros-caja.html"><i class="bi bi-cash-coin"></i><span>Retiros de caja</span></a>
+        <a href="cierre-caja.html"><i class="bi bi-cash-stack"></i><span>Cierre de caja</span></a>
+        <a class="active" href="inventario.html"><i class="bi bi-box-seam"></i><span>Inventario</span></a>
+        <a href="clientes.html"><i class="bi bi-people"></i><span>Clientes</span></a>
+        <a href="reportes.html"><i class="bi bi-clipboard-data"></i><span>Reportes</span></a>
+        <a href="soporte.html"><i class="bi bi-life-preserver"></i><span>Soporte</span></a>
+        <a href="configuracion.html"><i class="bi bi-gear"></i><span>Configuracion</span></a>
+      </nav>
+      <div class="sidebar-session">
+        <span>Sesion activa</span>
+        <strong id="sessionUser">Administrador</strong>
+        <small id="sessionLoginAt">--</small>
+      </div>
+    </aside>
+    <main class="app-main">
+      <header class="app-topbar"><div><p class="section-kicker">Inventario</p><h1>Control de existencias</h1></div></header>
+      <section class="kpi-grid">
+        <article class="kpi-card accent"><small>Total productos</small><strong id="inventoryMetricCount">0</strong><span>Referencias activas</span></article>
+        <article class="kpi-card"><small>Stock bajo</small><strong id="inventoryMetricLow">0</strong><span>Requieren reposicion</span></article>
+        <article class="kpi-card"><small>Agotados</small><strong id="inventoryMetricOut">0</strong><span>No disponibles</span></article>
+        <article class="kpi-card"><small>Valor inventario</small><strong id="inventoryMetricValue">$ 0</strong><span>Estimado actual</span></article>
+      </section>
+
+      <section class="two-col-grid wide-left mt-4">
+        <article class="module-card">
+          <div class="module-head">
+            <div><h2 id="inventoryFormTitle">Nuevo producto</h2><p>Crea, edita y sincroniza todo con Google Sheets.</p></div>
+            <div class="pill-row">
+              <button class="btn btn-outline-secondary" id="inventoryDownloadButton" type="button">Descargar inventario</button>
+              <button class="btn btn-outline-secondary" id="inventoryImportButton" type="button">Importar CSV</button>
+              <button class="btn btn-outline-secondary" id="inventoryRefreshButton" type="button">Sincronizar</button>
+              <button class="btn btn-outline-secondary" id="inventoryResetButton" type="button">Limpiar</button>
+            </div>
+          </div>
+          <input id="inventoryImportInput" type="file" accept=".csv,text/csv" hidden>
+          <form id="inventoryForm" class="form-stack inventory-form-grid">
+            <input id="inventoryItemId" type="hidden">
+            <div class="form-field">
+              <label for="inventorySku">SKU</label>
+              <input class="form-control" id="inventorySku" type="text" placeholder="FP-007" required>
+            </div>
+            <div class="form-field">
+              <label for="inventoryName">Producto</label>
+              <input class="form-control" id="inventoryName" type="text" placeholder="Nombre del producto" required>
+            </div>
+            <div class="form-field">
+              <label for="inventoryCategory">Categoria</label>
+              <select class="form-select" id="inventoryCategory" required>
+                <option value="analgesico">Analgésico</option>
+                <option value="vitamina">Vitamina</option>
+                <option value="cuidado">Cuidado</option>
+                <option value="general">General</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="inventoryPrice">Precio</label>
+              <input class="form-control" id="inventoryPrice" type="number" min="0" step="100" placeholder="0" required>
+            </div>
+            <div class="form-field">
+              <label for="inventoryStock">Stock</label>
+              <input class="form-control" id="inventoryStock" type="number" min="0" step="1" placeholder="0" required>
+            </div>
+            <div class="form-field">
+              <label for="inventoryBatch">Lote</label>
+              <input class="form-control" id="inventoryBatch" type="text" placeholder="LT-001">
+            </div>
+            <div class="form-field">
+              <label for="inventoryExpirationDate">Fecha de vencimiento</label>
+              <input class="form-control" id="inventoryExpirationDate" type="date">
+            </div>
+            <div class="form-field">
+              <label for="inventoryLaboratory">Laboratorio</label>
+              <input class="form-control" id="inventoryLaboratory" type="text" placeholder="Laboratorio fabricante">
+            </div>
+            <div class="form-field">
+              <label for="inventoryBarcode">Codigo de barras</label>
+              <input class="form-control" id="inventoryBarcode" type="text" placeholder="770...">
+              <div class="inventory-scan-actions">
+                <button class="btn btn-outline-secondary btn-sm" id="inventoryScanButton" type="button">
+                  <i class="bi bi-upc-scan"></i>
+                  <span>Escanear QR o codigo</span>
+                </button>
+                <small>Tambien puedes usar un lector externo en este campo.</small>
+              </div>
+            </div>
+            <div class="form-field inventory-form-full">
+              <label for="inventoryDescription">Descripcion</label>
+              <textarea class="form-control" id="inventoryDescription" rows="3" placeholder="Presentacion o detalle del producto"></textarea>
+            </div>
+            <div class="form-field inventory-form-full">
+              <label for="inventoryImageUrl">Imagen del producto</label>
+              <input class="form-control" id="inventoryImageUrl" type="text" placeholder="Pega una URL o carga una imagen">
+              <input id="inventoryImageData" type="hidden">
+              <input id="inventoryImageInput" type="file" accept="image/*" hidden>
+              <div class="inventory-image-tools">
+                <button class="btn btn-outline-secondary btn-sm" id="inventoryImageSearchButton" type="button">
+                  <i class="bi bi-search"></i>
+                  <span>Buscar en internet</span>
+                </button>
+                <button class="btn btn-outline-secondary btn-sm" id="inventoryImageUploadButton" type="button">
+                  <i class="bi bi-image"></i>
+                  <span>Cargar imagen</span>
+                </button>
+                <button class="btn btn-outline-secondary btn-sm" id="inventoryImageClearButton" type="button">
+                  <i class="bi bi-trash3"></i>
+                  <span>Quitar imagen</span>
+                </button>
+                <small>Puedes usar una URL publica o subir una foto desde el equipo.</small>
+              </div>
+              <div class="inventory-image-preview-wrap">
+                <img id="inventoryImagePreview" class="inventory-image-preview" src="" alt="Vista previa del producto" hidden>
+                <div id="inventoryImagePreviewEmpty" class="inventory-image-preview-empty">
+                  <i class="bi bi-image"></i>
+                  <span>Sin imagen</span>
+                </div>
+              </div>
+            </div>
+            <div class="form-field">
+              <label for="inventoryActive">Activo</label>
+              <select class="form-select" id="inventoryActive">
+                <option value="SI">Si</option>
+                <option value="NO">No</option>
+              </select>
+            </div>
+            <div class="inventory-form-actions inventory-form-full">
+              <button class="btn btn-brand" id="inventorySaveButton" type="submit">Guardar producto</button>
+              <span class="inventory-inline-status" id="inventoryFormStatus">Listo para guardar.</span>
+            </div>
+          </form>
+        </article>
+
+        <article class="module-card">
+          <div class="module-head">
+            <div><h2>Alertas de inventario</h2><p>Productos que requieren atencion.</p></div>
+            <button class="btn btn-outline-secondary" id="inventoryExpirationButton" type="button">Ver vencimientos</button>
+          </div>
+          <div id="inventoryAlerts" class="stack-list"></div>
+          <div class="module-head mt-4"><div><h2>Distribucion por categoria</h2><p>Resumen de unidades y referencias.</p></div></div>
+          <div id="inventoryCategoryList" class="stack-list"></div>
+        </article>
+      </section>
+
+      <section class="module-card mt-4">
+        <div class="module-head"><div><h2>Mapa de inventario</h2><p>Vista visual del stock actual.</p></div></div>
+        <div class="inventory-grid" id="inventoryBoard"></div>
+      </section>
+
+      <section class="module-card mt-4">
+        <div class="module-head"><div><h2>Detalle de inventario</h2><p>Tabla completa de existencias con edicion directa.</p></div></div>
+        <div class="inventory-filter-grid">
+          <div class="form-field">
+            <label for="inventorySearchInput">Buscar</label>
+            <input class="form-control" id="inventorySearchInput" type="text" placeholder="Producto, SKU, lote o laboratorio">
+          </div>
+          <div class="form-field">
+            <label for="inventoryExpirationFilter">Vencimiento</label>
+            <select class="form-select" id="inventoryExpirationFilter">
+              <option value="all">Todos</option>
+              <option value="expired">Vencidos</option>
+              <option value="soon">Proximos a vencer</option>
+              <option value="valid">Vigentes</option>
+              <option value="none">Sin fecha</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="inventoryBatchFilter">Lote</label>
+            <input class="form-control" id="inventoryBatchFilter" type="text" placeholder="Filtrar por lote">
+          </div>
+          <div class="form-field">
+            <label for="inventoryLaboratoryFilter">Laboratorio</label>
+            <input class="form-control" id="inventoryLaboratoryFilter" type="text" placeholder="Filtrar por laboratorio">
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table align-middle clean-table">
+            <thead>
+              <tr>
+                <th>SKU</th>
+                <th>Producto</th>
+                <th>Imagen</th>
+                <th>Categoria</th>
+                <th>Lote</th>
+                <th>Vencimiento</th>
+                <th>Estado venc.</th>
+                <th>Laboratorio</th>
+                <th>Precio</th>
+                <th>Stock</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="inventoryTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="ticket-modal" id="inventoryExpirationModal" hidden>
+    <div class="ticket-overlay" id="inventoryExpirationOverlay"></div>
+    <div class="ticket-card inventory-alert-modal">
+      <div class="ticket-head">
+        <h2>Alertas de vencimiento</h2>
+        <button class="icon-action" id="closeInventoryExpirationModal" type="button"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div class="inventory-alert-summary" id="inventoryExpirationSummary">Sin alertas.</div>
+      <div class="inventory-alert-list" id="inventoryExpirationList"></div>
+    </div>
+  </div>
+
+  <div class="ticket-modal" id="inventoryScannerModal" hidden>
+    <div class="ticket-overlay" id="inventoryScannerOverlay"></div>
+    <div class="ticket-card inventory-scanner-modal">
+      <div class="ticket-head">
+        <h2>Escanear QR o codigo</h2>
+        <button class="icon-action" id="closeInventoryScannerModal" type="button"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div class="inventory-scanner-body">
+        <video id="inventoryScannerVideo" class="inventory-scanner-video" autoplay muted playsinline></video>
+        <div class="inventory-scanner-copy">
+          <strong>Apunta la camara al codigo del producto.</strong>
+          <span id="inventoryScannerStatus">Preparando lector...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="farmapos-data.js"></script>
+</body>
+</html>

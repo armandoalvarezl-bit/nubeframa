@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Farma POS | Manual de Usuario</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="pos.css">
+  <style>
+    .manual-shell {
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .manual-sidebar {
+      padding: 1.25rem;
+      border-right: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(16px);
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+    }
+
+    .manual-sidebar .brand-box {
+      margin-bottom: 1.25rem;
+    }
+
+    .manual-sidebar-card {
+      background: rgba(255, 255, 255, 0.86);
+      border: 1px solid var(--border);
+      border-radius: 1.5rem;
+      box-shadow: var(--shadow-soft);
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .manual-sidebar-card h2 {
+      margin: 0 0 .8rem;
+      font-size: .84rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+    }
+
+    .manual-nav {
+      display: grid;
+      gap: .45rem;
+    }
+
+    .manual-nav a {
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+      padding: .8rem .9rem;
+      border-radius: 1rem;
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .manual-nav a:hover {
+      background: rgba(255, 106, 61, .08);
+      color: var(--primary-dark);
+    }
+
+    .manual-action-grid {
+      display: grid;
+      gap: .7rem;
+    }
+
+    .manual-action-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .65rem;
+      width: 100%;
+      padding: .85rem 1rem;
+      border-radius: 1rem;
+      text-decoration: none;
+      font-weight: 800;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+
+    .manual-action-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-soft);
+      border-color: rgba(255, 106, 61, .26);
+      color: var(--primary-dark);
+    }
+
+    .manual-action-btn.is-primary {
+      background: linear-gradient(135deg, #ff8358 0%, #ff6a3d 55%, #eb5227 100%);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 16px 30px rgba(255, 106, 61, .22);
+    }
+
+    .manual-action-btn.is-primary:hover {
+      color: #fff;
+    }
+
+    .manual-doc-links {
+      display: grid;
+      gap: .6rem;
+      margin-top: .9rem;
+    }
+
+    .manual-doc-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .8rem;
+      padding: .85rem .95rem;
+      border-radius: 1rem;
+      background: var(--soft);
+      border: 1px solid var(--border);
+      text-decoration: none;
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .manual-doc-link span {
+      color: var(--muted);
+      font-size: .88rem;
+      font-weight: 600;
+    }
+
+    .manual-doc-link:hover {
+      color: var(--primary-dark);
+      border-color: rgba(255, 106, 61, .2);
+      background: rgba(255, 106, 61, .06);
+    }
+
+    .manual-main {
+      padding: 1.5rem;
+    }
+
+    .manual-hero-card {
+      min-height: 100%;
+    }
+
+    .manual-hero-copy p {
+      max-width: 62ch;
+      color: rgba(255, 255, 255, .82);
+      line-height: 1.8;
+      margin: 0;
+    }
+
+    .manual-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: .9rem;
+      margin-top: 1.2rem;
+    }
+
+    .manual-strip-item {
+      padding: 1rem 1.1rem;
+      border-radius: 1.25rem;
+      background: rgba(255, 255, 255, .12);
+      border: 1px solid rgba(255, 255, 255, .12);
+    }
+
+    .manual-strip-item strong,
+    .manual-strip-item span {
+      display: block;
+    }
+
+    .manual-strip-item strong {
+      color: #fff;
+      margin-bottom: .4rem;
+    }
+
+    .manual-strip-item span {
+      color: rgba(255, 255, 255, .7);
+      font-size: .92rem;
+      line-height: 1.5;
+    }
+
+    .manual-grid {
+      display: grid;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .manual-two-col,
+    .manual-three-col {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .manual-two-col {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .manual-three-col {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .manual-note {
+      padding: 1rem 1.1rem;
+      border-radius: 1.2rem;
+      background: rgba(255, 106, 61, .08);
+      border: 1px solid rgba(255, 106, 61, .12);
+      color: #7f4a34;
+      line-height: 1.7;
+    }
+
+    .manual-list {
+      display: grid;
+      gap: .75rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .manual-list li {
+      display: grid;
+      grid-template-columns: 2.2rem minmax(0, 1fr);
+      gap: .9rem;
+      align-items: start;
+      padding: .9rem 1rem;
+      border-radius: 1rem;
+      background: var(--soft);
+      border: 1px solid var(--border);
+    }
+
+    .manual-step {
+      width: 2.2rem;
+      height: 2.2rem;
+      display: grid;
+      place-items: center;
+      border-radius: .9rem;
+      background: linear-gradient(135deg, #ff7b4f 0%, var(--primary) 55%, #e55328 100%);
+      color: #fff;
+      font-weight: 800;
+      box-shadow: 0 10px 24px rgba(255, 106, 61, .18);
+    }
+
+    .manual-list li div,
+    .module-card p,
+    .list-card span {
+      line-height: 1.7;
+    }
+
+    .manual-tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .65rem;
+    }
+
+    .manual-tag {
+      padding: .55rem .8rem;
+      border-radius: 999px;
+      background: rgba(255, 106, 61, .09);
+      color: var(--primary-dark);
+      font-size: .84rem;
+      font-weight: 800;
+    }
+
+    .manual-table-wrap {
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: 1.25rem;
+    }
+
+    .manual-table-wrap table {
+      width: 100%;
+      border-collapse: collapse;
+      background: transparent;
+    }
+
+    .manual-table-wrap th,
+    .manual-table-wrap td {
+      padding: .95rem 1rem;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .manual-table-wrap th {
+      color: var(--muted);
+      font-size: .78rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      background: rgba(255, 255, 255, .55);
+    }
+
+    .manual-table-wrap tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .manual-footer {
+      background: linear-gradient(180deg, #20384a 0%, #163040 100%);
+      color: rgba(255, 255, 255, .82);
+    }
+
+    .manual-footer h2,
+    .manual-footer p {
+      color: inherit;
+    }
+
+    @media (max-width: 1100px) {
+      .manual-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .manual-sidebar {
+        position: static;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .manual-strip,
+      .manual-two-col,
+      .manual-three-col {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body data-page="manual">
+  <div class="manual-shell">
+    <aside class="manual-sidebar">
+      <div class="brand-box">
+        <img class="brand-logo" src="assets/logo/logo-farmapos.png" alt="Logo Farma POS">
+        <div>
+          <strong>Farma POS</strong>
+          <span>Sistema comercial</span>
+        </div>
+      </div>
+
+      <div class="manual-sidebar-card">
+        <h2>Manual</h2>
+        <div class="stack-list">
+          <div class="list-card">
+            <strong>Guia operativa</strong>
+            <span>Basada en el flujo real de la plataforma.</span>
+          </div>
+        </div>
+        <div class="manual-doc-links">
+          <a class="manual-doc-link" href="plan-comercial.html">
+            <strong>Plan comercial</strong>
+            <span>Ventas y renovaciones</span>
+          </a>
+          <a class="manual-doc-link" href="checklist-lanzamiento.html">
+            <strong>Checklist lanzamiento</strong>
+            <span>Salida a produccion</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="manual-sidebar-card">
+        <h2>Indice</h2>
+        <nav class="manual-nav">
+          <a href="#manual-inicio"><i class="bi bi-grid-1x2-fill"></i><span>Vision general</span></a>
+          <a href="#manual-acceso"><i class="bi bi-shield-check"></i><span>Acceso y roles</span></a>
+          <a href="#manual-dashboard"><i class="bi bi-speedometer2"></i><span>Dashboard</span></a>
+          <a href="#manual-ventas"><i class="bi bi-receipt-cutoff"></i><span>Ventas</span></a>
+          <a href="#manual-historico"><i class="bi bi-clock-history"></i><span>Historico</span></a>
+          <a href="#manual-inventario"><i class="bi bi-box-seam"></i><span>Inventario</span></a>
+          <a href="#manual-clientes"><i class="bi bi-people"></i><span>Clientes</span></a>
+          <a href="#manual-caja"><i class="bi bi-cash-stack"></i><span>Caja</span></a>
+          <a href="#manual-reportes"><i class="bi bi-clipboard-data"></i><span>Reportes</span></a>
+          <a href="#manual-configuracion"><i class="bi bi-gear"></i><span>Configuracion</span></a>
+          <a href="#manual-soporte"><i class="bi bi-life-preserver"></i><span>Soporte</span></a>
+          <a href="#manual-flujo"><i class="bi bi-diagram-3"></i><span>Flujo diario</span></a>
+        </nav>
+      </div>
+
+      <div class="manual-sidebar-card">
+        <h2>Navegacion</h2>
+        <div class="manual-action-grid">
+          <a class="manual-action-btn is-primary" href="configuracion.html"><i class="bi bi-arrow-left-circle"></i><span>Volver a Configuracion</span></a>
+          <a class="manual-action-btn" href="dashboard.html"><i class="bi bi-house-door"></i><span>Ir al Panel Principal</span></a>
+        </div>
+      </div>
+    </aside>
+
+    <main class="manual-main">
+      <header class="app-topbar">
+        <div>
+          <p class="section-kicker">Documentacion</p>
+          <h1>Manual de usuario</h1>
+        </div>
+        <div class="dashboard-session-bar">
+          <div class="session-chip">
+            <span class="session-chip-label">Formato</span>
+            <strong>HTML visual</strong>
+          </div>
+          <div class="session-chip">
+            <span class="session-chip-label">Base</span>
+            <strong>Diseño real del sistema</strong>
+          </div>
+        </div>
+      </header>
+
+      <section class="dashboard-hero dashboard-hero-upgraded" id="manual-inicio">
+        <div class="hero-card main dashboard-main-card manual-hero-card">
+          <div class="dashboard-main-copy manual-hero-copy">
+            <p class="section-kicker text-white-50">Guia completa</p>
+            <h2>Todo lo que necesita el usuario para operar Farma POS de forma correcta.</h2>
+            <p>
+              Esta pagina resume el uso de acceso, ventas, inventario, clientes, retiros, cierre de caja,
+              reportes, configuracion y soporte, manteniendo la misma apariencia del sistema para que la experiencia
+              se sienta coherente con la plataforma real.
+            </p>
+          </div>
+          <div class="manual-strip">
+            <div class="manual-strip-item">
+              <strong>Acceso</strong>
+              <span>Usuarios validados en linea y permisos por rol.</span>
+            </div>
+            <div class="manual-strip-item">
+              <strong>Operacion</strong>
+              <span>Ventas, puntos, caja, inventario y tickets.</span>
+            </div>
+            <div class="manual-strip-item">
+              <strong>Sincronizacion</strong>
+              <span>Trabajo combinado entre localStorage y Google Sheets.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-stack dashboard-side-stack">
+          <div class="metric-tile metric-tile-primary">
+            <small>Vista</small>
+            <strong>Manual vivo</strong>
+            <span>Se abre como una pagina normal</span>
+          </div>
+          <div class="metric-tile">
+            <small>Diseño</small>
+            <strong>Paleta original</strong>
+            <span>Mismo estilo que el sistema</span>
+          </div>
+          <div class="metric-tile metric-tile-soft">
+            <small>Logo</small>
+            <strong>Logo real</strong>
+            <span>Desde <code>assets/logo</code></span>
+          </div>
+        </div>
+      </section>
+
+      <div class="manual-grid">
+        <section class="module-card" id="manual-acceso">
+          <div class="module-head">
+            <div>
+              <h2>Acceso y roles</h2>
+              <p>El ingreso principal se hace desde <code>pos.html</code> con validacion remota de usuarios.</p>
+            </div>
+          </div>
+          <div class="manual-two-col">
+            <div class="list-card">
+              <strong>Como ingresar</strong>
+              <ul class="manual-list mt-3">
+                <li><span class="manual-step">1</span><div>Escribe usuario y contrasena.</div></li>
+                <li><span class="manual-step">2</span><div>Pulsa <strong>Entrar al sistema</strong>.</div></li>
+                <li><span class="manual-step">3</span><div>Si la validacion es correcta, el sistema te lleva al dashboard.</div></li>
+              </ul>
+            </div>
+            <div class="list-card">
+              <strong>Permisos por rol</strong>
+              <div class="stack-list mt-3">
+                <div class="list-card">
+                  <strong>Administrador y supervisor</strong>
+                  <span>Acceso completo a los modulos.</span>
+                </div>
+                <div class="list-card">
+                  <strong>Cajero</strong>
+                  <span>Acceso a dashboard, ventas, historico, retiros y cierre de caja.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="module-card" id="manual-dashboard">
+          <div class="module-head">
+            <div>
+              <h2>Dashboard general</h2>
+              <p>Sirve para tener lectura rapida del negocio y entrar a los modulos principales.</p>
+            </div>
+          </div>
+          <div class="dashboard-shortcuts">
+            <article class="shortcut-card">
+              <i class="bi bi-cash-coin"></i>
+              <strong>Ventas del dia</strong>
+              <span>Muestra movimientos y valor acumulado del turno.</span>
+            </article>
+            <article class="shortcut-card">
+              <i class="bi bi-box-seam"></i>
+              <strong>Stock e inventario</strong>
+              <span>Resume productos, alertas y salud general del inventario.</span>
+            </article>
+            <article class="shortcut-card">
+              <i class="bi bi-people"></i>
+              <strong>Clientes</strong>
+              <span>Visualiza clientes registrados y compras frecuentes.</span>
+            </article>
+            <article class="shortcut-card">
+              <i class="bi bi-lightning-charge"></i>
+              <strong>Accion rapida</strong>
+              <span>Permite saltar directo a ventas, inventario y reportes.</span>
+            </article>
+          </div>
+        </section>
+
+        <section class="module-card" id="manual-ventas">
+          <div class="module-head">
+            <div>
+              <h2>Punto de venta</h2>
+              <p>El modulo de ventas es el nucleo operativo del sistema.</p>
+            </div>
+          </div>
+          <ul class="manual-list">
+            <li><span class="manual-step">1</span><div>Abrir caja con base inicial antes de cobrar.</div></li>
+            <li><span class="manual-step">2</span><div>Seleccionar cliente o dejar <strong>Cliente general</strong>.</div></li>
+            <li><span class="manual-step">3</span><div>Buscar productos y agregarlos al carrito segun stock disponible.</div></li>
+            <li><span class="manual-step">4</span><div>Elegir metodo de pago: efectivo, tarjeta o transferencia.</div></li>
+            <li><span class="manual-step">5</span><div>Si es efectivo, registrar el recibido y validar el cambio.</div></li>
+            <li><span class="manual-step">6</span><div>Cobrar, descontar stock, registrar la venta y generar ticket.</div></li>
+          </ul>
+          <div class="manual-three-col mt-3">
+            <div class="list-card">
+              <strong>Puntos</strong>
+              <span>Los clientes acumulan puntos y pueden redimirlos como descuento.</span>
+            </div>
+            <div class="list-card">
+              <strong>IVA</strong>
+              <span>La venta calcula subtotal, impuesto y total final.</span>
+            </div>
+            <div class="list-card">
+              <strong>Ticket</strong>
+              <span>Puede verse, descargarse e imprimirse con QR y datos de la farmacia.</span>
+            </div>
+          </div>
+          <div class="manual-note mt-3">
+            El sistema no permite cobrar con caja cerrada, sin productos, con stock insuficiente o con efectivo menor al total.
+          </div>
+        </section>
+
+        <section class="module-card" id="manual-historico">
+          <div class="module-head">
+            <div>
+              <h2>Historico de ventas</h2>
+              <p>Consulta tickets recientes y controla anulaciones con trazabilidad.</p>
+            </div>
+          </div>
+          <div class="manual-two-col">
+            <div class="list-card">
+              <strong>Acciones disponibles</strong>
+              <span>Ver ticket, imprimir, descargar y revisar ventas anteriores.</span>
+            </div>
+            <div class="list-card">
+              <strong>Anulacion</strong>
+              <span>Solicita supervisor responsable y motivo. Al anular, el stock local se repone.</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="module-card" id="manual-inventario">
+          <div class="module-head">
+            <div>
+              <h2>Inventario</h2>
+              <p>Permite crear, editar, importar, filtrar y sincronizar productos con Google Sheets.</p>
+            </div>
+          </div>
+          <div class="manual-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Seccion</th>
+                  <th>Uso</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Formulario</td>
+                  <td>Registrar SKU, producto, categoria, precio, stock, lote, vencimiento, laboratorio, codigo de barras y descripcion.</td>
+                </tr>
+                <tr>
+                  <td>Acciones</td>
+                  <td>Descargar inventario, importar CSV, sincronizar y limpiar formulario.</td>
+                </tr>
+                <tr>
+                  <td>Alertas</td>
+                  <td>Detectar stock bajo, productos agotados y proximos a vencer.</td>
+                </tr>
+                <tr>
+                  <td>Tabla</td>
+                  <td>Filtrar por producto, lote, laboratorio y estado de vencimiento.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="manual-tag-row mt-3">
+            <span class="manual-tag">CSV</span>
+            <span class="manual-tag">Sincronizacion remota</span>
+            <span class="manual-tag">Mapa de stock</span>
+            <span class="manual-tag">Vencimientos</span>
+          </div>
+        </section>
+
+        <section class="module-card" id="manual-clientes">
+          <div class="module-head">
+            <div>
+              <h2>Clientes</h2>
+              <p>Gestion de clientes, compras, puntos y total acumulado.</p>
+            </div>
+          </div>
+          <div class="manual-three-col">
+            <div class="list-card">
+              <strong>Registro rapido</strong>
+              <span>Nombre, documento y telefono.</span>
+            </div>
+            <div class="list-card">
+              <strong>Directorio</strong>
+              <span>Vista visual para consulta rapida.</span>
+            </div>
+            <div class="list-card">
+              <strong>Tabla administrativa</strong>
+              <span>Compras, puntos y total gastado del cliente.</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="module-card" id="manual-caja">
+          <div class="module-head">
+            <div>
+              <h2>Retiros y cierre de caja</h2>
+              <p>Control de efectivo con reglas, limites y autorizacion de supervisor.</p>
+            </div>
+          </div>
+          <div class="manual-two-col">
+            <div class="list-card">
+              <strong>Retiros de caja</strong>
+              <span>Requieren usuario y clave de supervisor. El sistema valida monto maximo y efectivo disponible antes de guardar.</span>
+            </div>
+            <div class="list-card">
+              <strong>Cierre de caja</strong>
+              <span>Calcula base inicial, ventas en efectivo, retiros, ajuste manual, efectivo contado y diferencia final.</span>
+            </div>
+          </div>
+          <div class="manual-tag-row mt-3">
+            <span class="manual-tag">Autorizacion obligatoria</span>
+            <span class="manual-tag">Historial de retiros</span>
+            <span class="manual-tag">Cierre imprimible</span>
+            <span class="manual-tag">Diferencia de caja</span>
+          </div>
+        </section>
+
+        <section class="module-card" id="manual-reportes">
+          <div class="module-head">
+            <div>
+              <h2>Reportes</h2>
+              <p>Reportes de dia, mes y ano con vista previa e impresion.</p>
+            </div>
+          </div>
+          <div class="manual-three-col">
+            <div class="list-card">
+              <strong>Indicadores</strong>
+              <span>Ingresos, unidades vendidas, ticket promedio y cliente top.</span>
+            </div>
+            <div class="list-card">
+              <strong>Periodos</strong>
+              <span>Dia, mes y ano, con resumen por metodo de pago.</span>
+            </div>
+            <div class="list-card">
+              <strong>Salida</strong>
+              <span>Descarga e impresion de reportes desde la misma pantalla.</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="module-card" id="manual-configuracion">
+          <div class="module-head">
+            <div>
+              <h2>Configuracion</h2>
+              <p>Personaliza la farmacia y consulta el estado tecnico del entorno.</p>
+            </div>
+          </div>
+          <div class="manual-two-col">
+            <div class="list-card">
+              <strong>Datos configurables</strong>
+              <span>Nombre comercial, logo, NIT, telefono, correo, direccion, ciudad y responsable.</span>
+            </div>
+            <div class="list-card">
+              <strong>Utilidades</strong>
+              <span>Ultimo ticket, exportacion de datos, restablecer demo y estado de sincronizacion.</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="module-card" id="manual-soporte">
+          <div class="module-head">
+            <div>
+              <h2>Soporte</h2>
+              <p>Canales directos para ayuda operativa, tecnica o comercial.</p>
+            </div>
+          </div>
+          <div class="dashboard-shortcuts">
+            <article class="shortcut-card">
+              <i class="bi bi-envelope-paper"></i>
+              <strong>Correo</strong>
+              <span><code>farmapossft@gmail.com</code></span>
+            </article>
+            <article class="shortcut-card">
+              <i class="bi bi-telephone"></i>
+              <strong>Llamadas</strong>
+              <span><code>3127947484</code></span>
+            </article>
+            <article class="shortcut-card">
+              <i class="bi bi-whatsapp"></i>
+              <strong>WhatsApp</strong>
+              <span><code>3206135719</code></span>
+            </article>
+          </div>
+        </section>
+
+        <section class="module-card" id="manual-flujo">
+          <div class="module-head">
+            <div>
+              <h2>Flujo diario recomendado</h2>
+              <p>Secuencia rapida para operar el sistema durante la jornada.</p>
+            </div>
+          </div>
+          <ul class="manual-list">
+            <li><span class="manual-step">1</span><div>Iniciar sesion y revisar dashboard.</div></li>
+            <li><span class="manual-step">2</span><div>Abrir caja antes de registrar ventas.</div></li>
+            <li><span class="manual-step">3</span><div>Vender, asociar clientes y emitir tickets.</div></li>
+            <li><span class="manual-step">4</span><div>Registrar retiros si el efectivo del turno lo requiere.</div></li>
+            <li><span class="manual-step">5</span><div>Consultar historico si necesitas reimpresion o anulacion.</div></li>
+            <li><span class="manual-step">6</span><div>Actualizar inventario y revisar alertas.</div></li>
+            <li><span class="manual-step">7</span><div>Hacer cierre de caja y guardar el comprobante del turno.</div></li>
+          </ul>
+        </section>
+
+        <section class="module-card manual-footer">
+          <div class="module-head">
+            <div>
+              <h2>Como visualizar este manual</h2>
+              <p>Abre este archivo HTML directamente en el navegador o desde tu editor como cualquier otra vista del proyecto.</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

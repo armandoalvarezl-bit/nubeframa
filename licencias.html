@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Farma POS | Licencias</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="pos.css">
+</head>
+<body data-page="licensing">
+  <div class="app-shell">
+    <aside class="app-sidebar">
+      <div class="brand-box"><img class="brand-logo" src="assets/logo/logo-farmapos.png" alt="Logo Farma POS"><div><strong>Farma POS</strong><span>Sistema comercial</span></div></div>
+      <nav class="app-nav">
+        <a href="dashboard.html"><i class="bi bi-grid-1x2-fill"></i><span>Inicio</span></a>
+        <a href="ventas.html"><i class="bi bi-receipt-cutoff"></i><span>Ventas</span></a>
+        <a href="historico-ventas.html"><i class="bi bi-clock-history"></i><span>Historico ventas</span></a>
+        <a href="retiros-caja.html"><i class="bi bi-cash-coin"></i><span>Retiros de caja</span></a>
+        <a href="cierre-caja.html"><i class="bi bi-cash-stack"></i><span>Cierre de caja</span></a>
+        <a href="inventario.html"><i class="bi bi-box-seam"></i><span>Inventario</span></a>
+        <a href="clientes.html"><i class="bi bi-people"></i><span>Clientes</span></a>
+        <a href="reportes.html"><i class="bi bi-clipboard-data"></i><span>Reportes</span></a>
+        <a class="active" href="licencias.html"><i class="bi bi-key-fill"></i><span>Licencias</span></a>
+        <a href="soporte.html"><i class="bi bi-life-preserver"></i><span>Soporte</span></a>
+        <a href="configuracion.html"><i class="bi bi-gear"></i><span>Configuracion</span></a>
+      </nav>
+      <div class="sidebar-session">
+        <span>Sesion activa</span>
+        <strong id="sessionUser">Administrador</strong>
+        <small id="sessionLoginAt">--</small>
+      </div>
+    </aside>
+    <main class="app-main">
+      <header class="app-topbar">
+        <div>
+          <p class="section-kicker">Activaciones</p>
+          <h1>Panel interno de licencias</h1>
+        </div>
+        <div class="settings-inline-actions">
+          <button class="btn btn-outline-secondary" id="openLicensingPendingModal" type="button">Pendientes de activacion</button>
+        </div>
+      </header>
+
+      <section class="kpi-grid licensing-kpi-grid">
+        <article class="kpi-card accent"><small>Licencias</small><strong id="licensingTotalLicenses">0</strong><span>Total registradas</span></article>
+        <article class="kpi-card"><small>Activas</small><strong id="licensingActiveLicenses">0</strong><span>Habilitadas para operar</span></article>
+        <article class="kpi-card"><small>Empresas</small><strong id="licensingTotalCompanies">0</strong><span>Instalaciones registradas</span></article>
+        <article class="kpi-card"><small>Equipos</small><strong id="licensingTotalDevices">0</strong><span>Instalaciones registradas</span></article>
+      </section>
+
+      <section class="two-col-grid licensing-layout-grid mt-4">
+        <article class="module-card licensing-company-card">
+          <div class="module-head"><div><h2>Empresas</h2><p>Registra clientes para activacion, soporte y control de despliegue.</p></div></div>
+          <form id="licensingCompanyForm" class="settings-form-stack">
+            <input id="licensingCompanyId" type="hidden">
+            <div class="settings-form-grid">
+              <label class="settings-field"><span>Empresa</span><input id="licensingCompanyName" type="text" placeholder="Farmacia Central SAS" maxlength="160"></label>
+              <label class="settings-field"><span>NIT</span><input id="licensingCompanyNit" type="text" placeholder="900123456-7" maxlength="40"></label>
+              <label class="settings-field"><span>Telefono</span><input id="licensingCompanyPhone" type="text" placeholder="3001234567" maxlength="30"></label>
+              <label class="settings-field"><span>Correo</span><input id="licensingCompanyEmail" type="email" placeholder="contacto@empresa.com" maxlength="120"></label>
+              <label class="settings-field"><span>Contacto</span><input id="licensingCompanyContact" type="text" placeholder="Responsable comercial" maxlength="120"></label>
+              <label class="settings-field">
+                <span>Estado</span>
+                <select id="licensingCompanyStatus" class="form-select">
+                  <option value="ACTIVA">Activa</option>
+                  <option value="INACTIVA">Inactiva</option>
+                </select>
+              </label>
+            </div>
+            <div class="settings-form-actions">
+              <p class="settings-form-note" id="licensingCompanySummary">Registra la empresa antes de emitir una licencia.</p>
+              <div class="settings-inline-actions">
+                <button class="btn btn-outline-secondary" id="licensingCompanyReset" type="button">Limpiar</button>
+                <button class="btn btn-brand" type="submit">Guardar empresa</button>
+              </div>
+            </div>
+          </form>
+          <section class="licensing-list-shell">
+            <div class="licensing-list-head">
+              <strong>Empresas guardadas</strong>
+              <span>Base interna de activaciones</span>
+            </div>
+            <div class="user-admin-list" id="licensingCompaniesList"></div>
+          </section>
+        </article>
+
+        <article class="module-card licensing-license-card">
+          <div class="module-head"><div><h2>Licencias</h2><p>Emite codigos robustos, activa, bloquea o renueva por periodos quincenales, mensuales o anuales.</p></div></div>
+          <form id="licensingLicenseForm" class="settings-form-stack">
+            <input id="licensingLicenseId" type="hidden">
+            <div class="settings-form-grid">
+              <label class="settings-field">
+                <span>Empresa</span>
+                <select id="licensingLicenseCompanyId" class="form-select"></select>
+              </label>
+              <label class="settings-field"><span>Codigo</span><input id="licensingLicenseCode" type="text" placeholder="LIC-NUBEFA-ANL-2026-AB12CD34EF56" maxlength="80"></label>
+              <label class="settings-field"><span>Cliente</span><input id="licensingLicenseCustomer" type="text" placeholder="Nombre del cliente" maxlength="150"></label>
+              <label class="settings-field"><span>Documento</span><input id="licensingLicenseDocument" type="text" placeholder="Documento/NIT contacto" maxlength="50"></label>
+              <label class="settings-field"><span>Telefono</span><input id="licensingLicensePhone" type="text" placeholder="3001234567" maxlength="30"></label>
+              <label class="settings-field"><span>Correo</span><input id="licensingLicenseEmail" type="email" placeholder="cliente@empresa.com" maxlength="120"></label>
+              <label class="settings-field">
+                <span>Plan</span>
+                <select id="licensingLicensePlan" class="form-select">
+                  <option value="QUINCENAL">Quincenal</option>
+                  <option value="MENSUAL">Mensual</option>
+                  <option value="ANUAL" selected>Anual</option>
+                </select>
+              </label>
+              <label class="settings-field"><span>Max. equipos</span><input id="licensingLicenseMaxDevices" type="number" min="1" step="1" value="1"></label>
+              <label class="settings-field"><span>Vence</span><input id="licensingLicenseExpiresAt" type="date"></label>
+              <label class="settings-field">
+                <span>Estado</span>
+                <select id="licensingLicenseStatus" class="form-select">
+                  <option value="PENDIENTE">Pendiente</option>
+                  <option value="ACTIVA">Activa</option>
+                  <option value="BLOQUEADA">Bloqueada</option>
+                  <option value="VENCIDA">Vencida</option>
+                </select>
+              </label>
+              <label class="settings-field wide"><span>Observaciones</span><input id="licensingLicenseNotes" type="text" placeholder="Notas internas" maxlength="255"></label>
+            </div>
+            <div class="settings-form-actions">
+              <p class="settings-form-note" id="licensingLicenseSummary">Gestiona activaciones, renovaciones y control tecnico del parque instalado.</p>
+              <div class="settings-inline-actions">
+                <button class="btn btn-outline-secondary" id="licensingLicenseReset" type="button">Limpiar</button>
+                <button class="btn btn-brand" type="submit">Guardar licencia</button>
+              </div>
+            </div>
+          </form>
+          <section class="licensing-list-shell">
+            <div class="licensing-list-head">
+              <strong>Licencias guardadas</strong>
+              <span>Asignacion y control tecnico</span>
+            </div>
+            <div class="user-admin-list" id="licensingLicensesList"></div>
+          </section>
+        </article>
+      </section>
+
+      <section class="two-col-grid mt-4">
+        <article class="module-card licensing-users-card">
+          <div class="module-head">
+            <div>
+              <h2>Usuarios por empresa</h2>
+              <p>Crea cajeros, supervisores o administradores y dejalos vinculados a la empresa correcta.</p>
+            </div>
+          </div>
+          <div id="userAdminRestricted" class="settings-restricted-note" hidden>
+            <i class="bi bi-shield-lock"></i>
+            <span>Este modulo solo esta disponible para usuarios con rol administrador.</span>
+          </div>
+          <div id="userAdminContent" hidden>
+            <form id="userAdminForm" class="settings-form-stack">
+              <input id="userAdminId" type="hidden">
+              <div class="settings-form-grid">
+                <label class="settings-field">
+                  <span>Empresa</span>
+                  <select id="userAdminCompanyId" class="form-select"></select>
+                </label>
+                <label class="settings-field"><span>Nombre</span><input id="userAdminName" type="text" placeholder="Nombre completo" maxlength="120"></label>
+                <label class="settings-field"><span>Usuario</span><input id="userAdminUsername" type="text" placeholder="usuario" maxlength="60"></label>
+                <label class="settings-field"><span>Clave</span><input id="userAdminPassword" type="password" placeholder="Solo diligencia para crear o cambiar clave" maxlength="120"></label>
+                <label class="settings-field">
+                  <span>Rol</span>
+                  <select id="userAdminRole" class="form-select">
+                    <option value="cajero">Cajero</option>
+                    <option value="supervisor">Supervisor</option>
+                    <option value="admin_empresa">Administrador farmacia</option>
+                  </select>
+                </label>
+                <label class="settings-field">
+                  <span>Estado</span>
+                  <select id="userAdminActive" class="form-select">
+                    <option value="SI">Activo</option>
+                    <option value="NO">Inactivo</option>
+                  </select>
+                </label>
+              </div>
+              <div class="settings-form-actions">
+                <p class="settings-form-note" id="userAdminSummary">Crea usuarios para caja, supervisor o administracion.</p>
+                <div class="settings-inline-actions">
+                  <button class="btn btn-outline-secondary" id="cancelUserAdminEdit" type="button">Limpiar</button>
+                  <button class="btn btn-brand" type="submit">Guardar usuario</button>
+                </div>
+              </div>
+            </form>
+            <section class="licensing-list-shell">
+              <div class="licensing-list-head">
+                <strong>Usuarios guardados</strong>
+                <span>Accesos operativos por empresa</span>
+              </div>
+              <div class="user-admin-list" id="userAdminList"></div>
+            </section>
+          </div>
+        </article>
+
+        <article class="module-card">
+          <div class="module-head"><div><h2>Equipos vinculados</h2><p>Instalaciones registradas por licencia.</p></div></div>
+          <div class="user-admin-list" id="licensingDevicesList"></div>
+        </article>
+        <article class="module-card">
+          <div class="module-head"><div><h2>Historial</h2><p>Eventos de activacion, renovacion, bloqueos y rechazos.</p></div></div>
+          <div class="user-admin-list" id="licensingHistoryList"></div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <div class="ticket-modal licensing-modal" id="licensingPendingModal" hidden>
+    <div class="ticket-overlay" id="licensingPendingOverlay"></div>
+    <div class="ticket-card licensing-modal-card">
+      <div class="ticket-head">
+        <h2>Empresas y licencias pendientes</h2>
+        <button class="icon-action" id="closeLicensingPendingModal" type="button"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div class="licensing-pending-content" id="licensingPendingContent"></div>
+      <div class="ticket-actions">
+        <button class="btn btn-brand" id="closeLicensingPendingModalFooter" type="button">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="farmapos-data.js"></script>
+</body>
+</html>

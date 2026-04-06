@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Farma POS | Soporte</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="pos.css">
+</head>
+<body data-page="support">
+  <div class="app-shell">
+    <aside class="app-sidebar">
+      <div class="brand-box"><img class="brand-logo" src="assets/logo/logo-farmapos.png" alt="Logo Farma POS"><div><strong>Farma POS</strong><span>Sistema comercial</span></div></div>
+      <nav class="app-nav">
+        <a href="dashboard.html"><i class="bi bi-grid-1x2-fill"></i><span>Inicio</span></a>
+        <a href="ventas.html"><i class="bi bi-receipt-cutoff"></i><span>Ventas</span></a>
+        <a href="historico-ventas.html"><i class="bi bi-clock-history"></i><span>Historico ventas</span></a>
+        <a href="retiros-caja.html"><i class="bi bi-cash-coin"></i><span>Retiros de caja</span></a>
+        <a href="cierre-caja.html"><i class="bi bi-cash-stack"></i><span>Cierre de caja</span></a>
+        <a href="inventario.html"><i class="bi bi-box-seam"></i><span>Inventario</span></a>
+        <a href="clientes.html"><i class="bi bi-people"></i><span>Clientes</span></a>
+        <a href="reportes.html"><i class="bi bi-clipboard-data"></i><span>Reportes</span></a>
+        <a class="active" href="soporte.html"><i class="bi bi-life-preserver"></i><span>Soporte</span></a>
+        <a href="configuracion.html"><i class="bi bi-gear"></i><span>Configuracion</span></a>
+      </nav>
+      <div class="sidebar-session">
+        <span>Sesion activa</span>
+        <strong id="sessionUser">Administrador</strong>
+        <small data-session-role-sidebar="true">Rol: Cajero</small>
+        <small id="sessionLoginAt">--</small>
+      </div>
+    </aside>
+    <main class="app-main">
+      <header class="app-topbar">
+        <div>
+          <p class="section-kicker">Ayuda</p>
+          <h1>Centro de soporte</h1>
+        </div>
+        <div class="dashboard-session-bar">
+          <div class="session-chip">
+            <span class="session-chip-label">Usuario</span>
+            <strong id="sessionUserTop">Administrador</strong>
+          </div>
+          <div class="session-chip">
+            <span class="session-chip-label">Rol</span>
+            <strong data-session-role="true">Cajero</strong>
+          </div>
+          <a class="btn btn-outline-secondary" href="ventas.html">Volver a ventas</a>
+          <button class="btn btn-outline-secondary" id="logoutButton" type="button">Cerrar sesion</button>
+        </div>
+      </header>
+
+      <section class="kpi-grid licensing-kpi-grid">
+        <article class="kpi-card accent"><small>Tickets</small><strong id="supportTicketTotal">0</strong><span>Total de conversaciones</span></article>
+        <article class="kpi-card"><small>Abiertos</small><strong id="supportTicketOpen">0</strong><span>Pendientes por resolver</span></article>
+        <article class="kpi-card"><small>No leidos</small><strong id="supportUnreadCounter">0</strong><span>Mensajes nuevos</span></article>
+        <article class="kpi-card"><small>Canales directos</small><strong>3</strong><span>Correo, llamada y WhatsApp</span></article>
+      </section>
+
+      <section class="support-layout-grid mt-4">
+        <article class="module-card support-sidebar-card">
+          <div class="module-head">
+            <div>
+              <h2>Bandeja de tickets</h2>
+              <p id="supportInboxSummary">Revisa y responde conversaciones activas.</p>
+            </div>
+          </div>
+          <div class="support-toolbar">
+            <button class="btn btn-brand" id="supportNewTicketButton" type="button">Nuevo ticket</button>
+            <button class="btn btn-outline-secondary" id="supportRefreshButton" type="button">Actualizar</button>
+          </div>
+          <div class="user-admin-list" id="supportTicketList"></div>
+        </article>
+
+        <article class="module-card support-chat-card">
+          <div class="module-head">
+            <div>
+              <h2 id="supportThreadTitle">Soporte interno</h2>
+              <p id="supportThreadMeta">Selecciona un ticket o crea uno nuevo para iniciar la conversacion.</p>
+            </div>
+            <div class="settings-inline-actions" id="supportThreadActions">
+              <select id="supportStatusSelect" class="form-select" hidden>
+                <option value="ABIERTO">Abierto</option>
+                <option value="EN_PROCESO">En proceso</option>
+                <option value="RESUELTO">Resuelto</option>
+                <option value="CERRADO">Cerrado</option>
+              </select>
+              <button class="btn btn-outline-secondary" id="supportUpdateStatusButton" type="button" hidden>Actualizar estado</button>
+            </div>
+          </div>
+
+          <div class="support-compose-card" id="supportTicketCreateCard">
+            <div class="settings-form-grid">
+              <label class="settings-field wide"><span>Asunto</span><input id="supportTicketTitleInput" type="text" placeholder="Ej. Error al imprimir ticket" maxlength="180"></label>
+              <label class="settings-field"><span>Categoria</span><input id="supportTicketCategoryInput" type="text" placeholder="General, acceso, ventas..." maxlength="80"></label>
+              <label class="settings-field">
+                <span>Prioridad</span>
+                <select id="supportTicketPriorityInput" class="form-select">
+                  <option value="MEDIA">Media</option>
+                  <option value="ALTA">Alta</option>
+                  <option value="BAJA">Baja</option>
+                </select>
+              </label>
+              <label class="settings-field wide"><span>Describe la solicitud</span><textarea id="supportTicketMessageInput" rows="5" placeholder="Cuéntanos lo que pasa, cuándo ocurre y qué necesitas." maxlength="5000"></textarea></label>
+            </div>
+            <div class="settings-inline-actions">
+              <button class="btn btn-brand" id="supportCreateTicketButton" type="button">Crear ticket</button>
+            </div>
+          </div>
+
+          <div class="support-thread-feed" id="supportThreadMessages">
+            <div class="user-admin-empty">Aun no hay mensajes en esta conversacion.</div>
+          </div>
+
+          <div class="support-reply-box">
+            <textarea id="supportReplyInput" rows="3" placeholder="Escribe tu respuesta o detalle adicional..." maxlength="5000"></textarea>
+            <div class="settings-inline-actions">
+              <button class="btn btn-brand" id="supportSendReplyButton" type="button">Enviar mensaje</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="module-card support-contact-card">
+          <div class="module-head">
+            <div>
+              <h2>Canales directos</h2>
+              <p>Tambien puedes usar estos contactos cuando necesites una atencion inmediata.</p>
+            </div>
+          </div>
+          <div class="stack-list">
+            <a class="list-card support-contact-link" href="mailto:farmapossft@gmail.com">
+              <strong>Correo</strong>
+              <span>farmapossft@gmail.com</span>
+            </a>
+            <a class="list-card support-contact-link" href="tel:+573127947484">
+              <strong>Llamadas</strong>
+              <span>3127947484</span>
+            </a>
+            <a class="list-card support-contact-link" href="https://wa.me/573206135719" target="_blank" rel="noopener noreferrer">
+              <strong>WhatsApp</strong>
+              <span>3206135719</span>
+            </a>
+          </div>
+          <div class="settings-restricted-note">
+            <i class="bi bi-bell"></i>
+            <span>Los mensajes del chat interno generan notificacion para el otro lado dentro de la plataforma.</span>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+  <script src="farmapos-data.js"></script>
+</body>
+</html>

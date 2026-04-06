@@ -1,0 +1,7 @@
+id,sku,nombre,categoria,precio,stock,codigo_barras,descripcion,activo
+1,FP-001,Acetaminofen 500 mg,analgesico,8500,24,770000000001,Tabletas x 100 unidades,SI
+2,FP-002,Ibuprofeno 400 mg,analgesico,12400,18,770000000002,Capsulas blandas x 50,SI
+3,FP-003,Vitamina C 1 g,vitamina,18900,31,770000000003,Tabletas efervescentes,SI
+4,FP-004,Protector solar FPS 50,cuidado,35900,9,770000000004,Presentacion 120 ml,SI
+5,FP-005,Alcohol antiseptico,cuidado,6200,42,770000000005,Frasco 350 ml,SI
+6,FP-006,Multivitaminico adulto,vitamina,27400,16,770000000006,Frasco x 60 capsulas,SI

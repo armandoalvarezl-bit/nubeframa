@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Farma POS | Retiros de Caja</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="pos.css">
+</head>
+<body data-page="cash-withdrawal">
+  <div class="app-shell">
+    <aside class="app-sidebar">
+      <div class="brand-box"><img class="brand-logo" src="assets/logo/logo-farmapos.png" alt="Logo Farma POS"><div><strong>Farma POS</strong><span>Sistema comercial</span></div></div>
+      <nav class="app-nav">
+        <a href="dashboard.html"><i class="bi bi-grid-1x2-fill"></i><span>Inicio</span></a>
+        <a href="ventas.html"><i class="bi bi-receipt-cutoff"></i><span>Ventas</span></a>
+        <a href="historico-ventas.html"><i class="bi bi-clock-history"></i><span>Historico ventas</span></a>
+        <a class="active" href="retiros-caja.html"><i class="bi bi-cash-coin"></i><span>Retiros de caja</span></a>
+        <a href="cierre-caja.html"><i class="bi bi-cash-stack"></i><span>Cierre de caja</span></a>
+        <a href="inventario.html"><i class="bi bi-box-seam"></i><span>Inventario</span></a>
+        <a href="clientes.html"><i class="bi bi-people"></i><span>Clientes</span></a>
+        <a href="reportes.html"><i class="bi bi-clipboard-data"></i><span>Reportes</span></a>
+        <a href="soporte.html"><i class="bi bi-life-preserver"></i><span>Soporte</span></a>
+        <a href="configuracion.html"><i class="bi bi-gear"></i><span>Configuracion</span></a>
+      </nav>
+      <div class="sidebar-session">
+        <span>Sesion activa</span>
+        <strong id="sessionUser">Administrador</strong>
+        <small id="sessionLoginAt">--</small>
+      </div>
+    </aside>
+    <main class="app-main">
+      <header class="app-topbar">
+        <div><p class="section-kicker">Caja</p><h1>Retiros de caja</h1></div>
+      </header>
+
+      <section class="kpi-grid">
+        <article class="kpi-card accent"><small>Efectivo disponible para retirar</small><strong id="withdrawalAvailableCash">$ 0</strong><span>Ventas en efectivo despues de retiros, sin tocar la base</span></article>
+        <article class="kpi-card"><small>Retiros del dia</small><strong id="withdrawalTodayTotal">$ 0</strong><span><span id="withdrawalTodayCount">0</span> registros hoy</span></article>
+        <article class="kpi-card"><small>Cajero activo</small><strong id="withdrawalCashierName">--</strong><span id="withdrawalCashierUser">--</span></article>
+      </section>
+
+      <section class="two-col-grid wide-left mt-4">
+        <article class="module-card">
+          <div class="module-head">
+            <div><h2>Registrar retiro</h2><p>El cajero solo puede guardar el retiro con autorizacion de un supervisor.</p></div>
+          </div>
+
+          <form id="cashWithdrawalForm" class="closure-form-grid">
+            <div class="form-field">
+              <label for="withdrawalAmount">Valor a retirar</label>
+              <input class="form-control" id="withdrawalAmount" type="number" min="0" max="450000" step="1000" placeholder="0">
+              <small class="text-muted">Valor maximo por retiro: $ 450.000</small>
+            </div>
+            <div class="form-field">
+              <label for="withdrawalReason">Motivo</label>
+              <select class="form-control" id="withdrawalReason">
+                <option value="">Selecciona un motivo</option>
+                <option value="Consignacion">Consignacion</option>
+                <option value="Pago a proveedor">Pago a proveedor</option>
+                <option value="Caja menor">Caja menor</option>
+                <option value="Gasto operativo">Gasto operativo</option>
+                <option value="Traslado de efectivo">Traslado de efectivo</option>
+                <option value="Otro">Otro</option>
+              </select>
+              <textarea class="form-control mt-2" id="withdrawalReasonOther" rows="3" placeholder="Escribe el motivo del retiro." hidden></textarea>
+            </div>
+            <div class="form-field">
+              <label for="withdrawalSupervisorUser">Usuario supervisor</label>
+              <input class="form-control" id="withdrawalSupervisorUser" type="text" placeholder="Usuario con permiso de supervisor">
+            </div>
+            <div class="form-field">
+              <label for="withdrawalSupervisorPassword">Clave supervisor</label>
+              <input class="form-control" id="withdrawalSupervisorPassword" type="password" placeholder="Clave del supervisor">
+            </div>
+            <div class="report-print-actions">
+              <button class="btn btn-outline-secondary" id="clearWithdrawalForm" type="button">Limpiar</button>
+              <button class="btn btn-outline-secondary" id="printLastWithdrawal" type="button" hidden>Imprimir ultimo</button>
+              <button class="btn btn-brand" type="submit">Guardar retiro</button>
+            </div>
+          </form>
+        </article>
+
+        <aside class="module-card">
+          <div class="module-head">
+            <div><h2>Control</h2><p>Este modulo guarda cada retiro en MySQL/MariaDB con validacion real de supervisor.</p></div>
+          </div>
+          <div class="stack-list">
+            <div class="list-card"><strong>Autorizacion obligatoria</strong><span>Se valida usuario y clave del supervisor antes de guardar.</span></div>
+            <div class="list-card"><strong>Trazabilidad</strong><span>Se almacena cajero, supervisor, motivo, fecha, hora y monto.</span></div>
+            <div class="list-card"><strong>Regla de caja</strong><span>No se puede retirar mas de $ 450.000 ni mas del efectivo disponible.</span></div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="module-card mt-4">
+        <div class="module-head">
+          <div><h2>Historial de retiros</h2><p>Ultimos retiros guardados en MySQL/MariaDB.</p></div>
+        </div>
+        <div class="stack-list" id="cashWithdrawalsList"></div>
+      </section>
+    </main>
+  </div>
+  <script src="farmapos-data.js"></script>
+</body>
+</html>
+

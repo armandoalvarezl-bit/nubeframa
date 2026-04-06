@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Farma POS | Ventas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="pos.css">
+</head>
+<body data-page="sales">
+  <div class="app-shell">
+    <aside class="app-sidebar">
+      <div class="brand-box"><img class="brand-logo" src="assets/logo/logo-farmapos.png" alt="Logo Farma POS"><div><strong>Farma POS</strong><span>Sistema comercial</span></div></div>
+      <nav class="app-nav">
+        <a href="dashboard.html"><i class="bi bi-grid-1x2-fill"></i><span>Inicio</span></a>
+        <a class="active" href="ventas.html"><i class="bi bi-receipt-cutoff"></i><span>Ventas</span></a>
+        <a href="historico-ventas.html"><i class="bi bi-clock-history"></i><span>Historico ventas</span></a>
+        <a href="retiros-caja.html"><i class="bi bi-cash-coin"></i><span>Retiros de caja</span></a>
+        <a href="cierre-caja.html"><i class="bi bi-cash-stack"></i><span>Cierre de caja</span></a>
+        <a href="inventario.html"><i class="bi bi-box-seam"></i><span>Inventario</span></a>
+        <a href="promociones.html"><i class="bi bi-megaphone"></i><span>Promociones</span></a>
+        <a href="clientes.html"><i class="bi bi-people"></i><span>Clientes</span></a>
+        <a href="reportes.html"><i class="bi bi-clipboard-data"></i><span>Reportes</span></a>
+        <a href="soporte.html"><i class="bi bi-life-preserver"></i><span>Soporte</span></a>
+        <a href="configuracion.html"><i class="bi bi-gear"></i><span>Configuracion</span></a>
+      </nav>
+      <div class="sidebar-session">
+        <span>Sesion activa</span>
+        <strong id="sessionUser">Administrador</strong>
+        <small data-session-role-sidebar="true">Rol: Cajero</small>
+        <small id="sessionLoginAt">--</small>
+      </div>
+    </aside>
+    <main class="app-main">
+      <header class="app-topbar sales-topbar-shell sales-terminal-shell">
+        <div class="topbar-main sales-topbar-main">
+          <button class="workspace-menu-toggle" id="salesSidebarToggle" type="button" aria-label="Abrir menu">
+            <i class="bi bi-layout-sidebar-inset"></i>
+            <span>Menu</span>
+          </button>
+          <div class="sales-topbar-copy">
+            <p class="section-kicker">Terminal POS</p>
+            <h3>Modulo de ventas</h3>
+            <small>Operacion de mostrador enfocada en busqueda, seleccion y cobro rapido.</small>
+          </div>
+        </div>
+        <div class="sales-topbar-actions">
+          <div class="sales-search-panel">
+            <div class="search-box sales-search-box">
+              <i class="bi bi-upc-scan"></i>
+              <input id="salesSearchInput" type="text" placeholder="Buscar, escanear codigo de barras o SKU">
+            </div>
+            <small class="sales-search-hint">Usa el lector o escribe el codigo manualmente y presiona Enter.</small>
+          </div>
+        </div>
+      </header>
+      <section class="sales-terminal-strip">
+        <div class="sales-terminal-chip">
+          <span>Terminal</span>
+          <strong>Mostrador principal</strong>
+        </div>
+        <div class="sales-terminal-chip">
+          <span>Modo</span>
+          <strong>Venta asistida</strong>
+        </div>
+        <div class="sales-terminal-chip">
+          <span>Atajo</span>
+          <strong>Enter para buscar</strong>
+        </div>
+      </section>
+      <section class="sales-overview-strip">
+        <article class="sales-overview-card sales-overview-highlight">
+          <span>Estado de caja</span>
+          <strong id="cashDrawerStatus">Caja cerrada</strong>
+          <small id="cashDrawerAlert" class="text-danger" hidden>Las ventas en efectivo superan el tope sugerido de $ 400.000. Realiza retiro o cierre.</small>
+        </article>
+        <article class="sales-overview-card">
+          <span>Cliente actual</span>
+          <strong id="cartClientLabel">Cliente general</strong>
+          <small>Selecciona el cliente antes de cobrar.</small>
+        </article>
+        <article class="sales-overview-card sales-overview-actions">
+          <button class="btn btn-outline-secondary sales-overview-primary-action" id="openCashDrawerTrigger" type="button">Abrir caja</button>
+          <a class="btn btn-brand sales-overview-primary-action" id="goCashClosureButton" href="cierre-caja.html" hidden>
+            <i class="bi bi-cash-stack"></i>
+            <span>Cierre de caja</span>
+          </a>
+        </article>
+      </section>
+      <section class="sales-utility-strip">
+        <a class="btn btn-outline-secondary sales-utility-link" href="historico-ventas.html">
+          <i class="bi bi-clock-history"></i>
+          <span>Historico ventas</span>
+        </a>
+        <a class="btn btn-outline-secondary sales-utility-link" href="retiros-caja.html">
+          <i class="bi bi-cash-coin"></i>
+          <span>Retiros de caja</span>
+        </a>
+      </section>
+      <section class="sales-layout sales-layout-compact">
+        <article class="module-card sales-catalog-card">
+          <div class="module-head">
+            <div><h2>Catalogo de productos</h2><p>Vista principal para seleccionar articulos como en un POS de escritorio.</p></div>
+            <div class="pill-row">
+              <button class="soft-pill active" data-filter="all" type="button">Todos</button>
+              <button class="soft-pill" data-filter="analgesico" type="button">Analgésicos</button>
+              <button class="soft-pill" data-filter="vitamina" type="button">Vitaminas</button>
+              <button class="soft-pill" data-filter="cuidado" type="button">Cuidado</button>
+            </div>
+          </div>
+          <div class="sales-terminal-board">
+            <article class="sales-terminal-stat">
+              <span>Busqueda</span>
+              <strong>Rapida por nombre o codigo</strong>
+            </article>
+            <article class="sales-terminal-stat">
+              <span>Vista</span>
+              <strong>Productos disponibles para vender</strong>
+            </article>
+            <article class="sales-terminal-stat">
+              <span>Flujo</span>
+              <strong>Selecciona, agrega y cobra</strong>
+            </article>
+          </div>
+          <div class="sales-toolbar">
+            <div class="form-field compact"><label for="saleClient">Cliente</label><select id="saleClient" class="form-select"></select></div>
+            <div class="toolbar-actions"><button class="btn btn-outline-secondary" id="newSaleButton" type="button">Nueva venta</button></div>
+          </div>
+          <div class="catalog-grid" id="productGrid">
+            <article class="product-card" data-category="analgesico" data-name="Acetaminofén 500 mg" data-price="8500"><div class="product-tag">SKU FP-001</div><div class="product-icon"><i class="bi bi-capsule"></i></div><h3>Acetaminofén 500 mg</h3><p>Tabletas x 100 unidades</p><div class="product-meta"><strong>$ 8.500</strong><span>Stock 24</span></div><button class="btn btn-brand add-to-cart" type="button">Agregar</button></article>
+            <article class="product-card" data-category="analgesico" data-name="Ibuprofeno 400 mg" data-price="12400"><div class="product-tag">SKU FP-002</div><div class="product-icon"><i class="bi bi-capsule-pill"></i></div><h3>Ibuprofeno 400 mg</h3><p>Cápsulas blandas x 50</p><div class="product-meta"><strong>$ 12.400</strong><span>Stock 18</span></div><button class="btn btn-brand add-to-cart" type="button">Agregar</button></article>
+            <article class="product-card" data-category="vitamina" data-name="Vitamina C 1 g" data-price="18900"><div class="product-tag">SKU FP-003</div><div class="product-icon"><i class="bi bi-droplet-half"></i></div><h3>Vitamina C 1 g</h3><p>Tabletas efervescentes</p><div class="product-meta"><strong>$ 18.900</strong><span>Stock 31</span></div><button class="btn btn-brand add-to-cart" type="button">Agregar</button></article>
+            <article class="product-card" data-category="cuidado" data-name="Protector solar FPS 50" data-price="35900"><div class="product-tag">SKU FP-004</div><div class="product-icon"><i class="bi bi-sun"></i></div><h3>Protector solar FPS 50</h3><p>Presentación 120 ml</p><div class="product-meta"><strong>$ 35.900</strong><span>Stock 9</span></div><button class="btn btn-brand add-to-cart" type="button">Agregar</button></article>
+            <article class="product-card" data-category="cuidado" data-name="Alcohol antiséptico" data-price="6200"><div class="product-tag">SKU FP-005</div><div class="product-icon"><i class="bi bi-heart-pulse"></i></div><h3>Alcohol antiséptico</h3><p>Frasco 350 ml</p><div class="product-meta"><strong>$ 6.200</strong><span>Stock 42</span></div><button class="btn btn-brand add-to-cart" type="button">Agregar</button></article>
+            <article class="product-card" data-category="vitamina" data-name="Multivitamínico adulto" data-price="27400"><div class="product-tag">SKU FP-006</div><div class="product-icon"><i class="bi bi-heart"></i></div><h3>Multivitamínico adulto</h3><p>Frasco x 60 cápsulas</p><div class="product-meta"><strong>$ 27.400</strong><span>Stock 16</span></div><button class="btn btn-brand add-to-cart" type="button">Agregar</button></article>
+          </div>
+        </article>
+        <aside class="module-card sale-cart sales-cart-card">
+          <div class="module-head"><div><h2>Panel de cobro</h2><p>Resumen operativo de la orden en curso.</p></div><button class="icon-action" id="clearCart" type="button"><i class="bi bi-trash3"></i></button></div>
+          <div class="sales-cart-banner">
+            <span>Resumen de ticket</span>
+            <strong>Confirma cantidades, descuentos y metodo de pago</strong>
+          </div>
+          <div id="cartList" class="cart-list"><div class="empty-state" id="emptyCart"><i class="bi bi-cart3"></i><p>No hay productos agregados.</p></div></div>
+          <div class="totals-box"><div><span>Subtotal</span><strong id="subtotalValue">$ 0</strong></div><div><span>Promociones</span><strong id="promoDiscountValue">$ 0</strong></div><div><span>IVA</span><strong id="taxValue">$ 0</strong></div><div><span>Descuento puntos</span><strong id="loyaltyDiscountValue">$ 0</strong></div><div class="total-strong"><span>Total</span><strong id="totalValue">$ 0</strong></div></div>
+          <div class="list-card sales-loyalty-card">
+            <strong>Puntos del cliente</strong>
+            <span>Disponibles: <strong id="availablePointsValue">0</strong></span>
+            <label class="mt-2" for="redeemPointsInput">Puntos a redimir</label>
+            <input class="form-control mt-2" id="redeemPointsInput" type="number" min="0" step="1" value="0" placeholder="0">
+            <small class="text-muted d-block mt-2">Cada punto redime $ 1 de descuento.</small>
+          </div>
+          <div class="payment-grid"><button class="payment-btn active" type="button">Efectivo</button><button class="payment-btn" type="button">Tarjeta</button><button class="payment-btn" type="button">Transferencia</button></div>
+          <div class="cash-box" id="cashPanel"><label for="cashReceived">Recibido</label><input class="form-control" id="cashReceived" type="number" min="0" step="100" placeholder="0"><div class="cash-change"><span>Cambio</span><strong id="changeValue">$ 0</strong></div></div>
+          <div class="checkout-row"><button class="btn btn-outline-secondary" type="button">Guardar</button><button class="btn btn-brand" id="checkoutSale" type="button">Cobrar</button></div>
+          <div class="module-head mt-4"><div><h2>Acceso rápido</h2><p>Consulta tickets y ventas en una pagina aparte.</p></div></div>
+        </aside>
+      </section>
+    </main>
+  </div>
+  <div class="sales-sidebar-backdrop" id="salesSidebarBackdrop" hidden></div>
+  <div class="ticket-modal" id="ticketModal" hidden>
+    <div class="ticket-overlay" id="ticketOverlay"></div>
+    <div class="ticket-card">
+      <div class="ticket-head"><h2>Ticket de compra</h2><button class="icon-action" id="closeTicket" type="button"><i class="bi bi-x-lg"></i></button></div>
+      <div class="ticket-paper" id="ticketContent"></div>
+      <div class="ticket-actions"><button class="btn btn-outline-secondary" id="downloadTicket" type="button">Descargar ticket</button><button class="btn btn-brand" id="printTicket" type="button">Imprimir</button></div>
+    </div>
+  </div>
+  <div class="ticket-modal" id="cashOpeningModal" hidden>
+    <div class="ticket-overlay" id="cashOpeningOverlay"></div>
+    <div class="ticket-card cash-opening-card">
+      <div class="ticket-head">
+        <div>
+          <p class="cash-opening-kicker">Caja</p>
+          <h2>Apertura de caja</h2>
+        </div>
+        <button class="icon-action" id="closeCashOpeningModal" type="button"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div class="cash-opening-shell">
+        <div class="stack-list cash-opening-summary-stack">
+          <div class="list-card"><strong>Inicio de jornada</strong><span>Ingresa la base inicial para habilitar las ventas del día.</span></div>
+        </div>
+        <div class="mt-3">
+          <label for="salesOpeningAmount">Monto inicial</label>
+          <input class="form-control mt-2" id="salesOpeningAmount" type="number" min="0" step="1000" placeholder="0">
+        </div>
+      </div>
+      <div class="ticket-actions">
+        <button class="btn btn-outline-secondary" id="cancelCashOpening" type="button">Cancelar</button>
+        <button class="btn btn-outline-secondary" id="printOpeningTicketModal" type="button" hidden>Imprimir comprobante</button>
+        <button class="btn btn-brand" id="confirmOpenCashDrawer" type="button">Abrir caja</button>
+      </div>
+    </div>
+  </div>
+  <script src="farmapos-data.js"></script>
+</body>
+</html>

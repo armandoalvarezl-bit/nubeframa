@@ -1,0 +1,53 @@
+{
+  "name": "farmapos-desktop",
+  "version": "1.1.0",
+  "description": "FarmaPOS Desktop empaquetado como aplicacion de escritorio con Electron.",
+  "main": "electron/main.js",
+  "author": "FarmaPOS Desktop",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "start:web-api": "node support-api/src/server.js",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8"
+  },
+  "dependencies": {
+    "mysql2": "^3.11.3"
+  },
+  "build": {
+    "appId": "com.farmapos.desktop",
+    "productName": "FarmaPOS Desktop",
+    "icon": "icon.ico",
+    "files": [
+      "**/*",
+      "!db.config.json",
+      "!farmapos/**",
+      "!plantilla-online/**",
+      "!*.gs",
+      "!README.md",
+      "!INVENTARIO-SETUP.md"
+    ],
+    "directories": {
+      "buildResources": "assets"
+    },
+    "win": {
+      "icon": "icon.ico",
+      "signAndEditExecutable": false,
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}
