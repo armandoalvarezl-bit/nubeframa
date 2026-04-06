@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Farma POS | Clientes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="pos.css">
+</head>
+<body data-page="clients">
+  <div class="app-shell">
+    <aside class="app-sidebar">
+      <div class="brand-box"><img class="brand-logo" src="assets/logo/logo-farmapos.png" alt="Logo Farma POS"><div><strong>Farma POS</strong><span>Sistema comercial</span></div></div>
+      <nav class="app-nav">
+        <a href="dashboard.html"><i class="bi bi-grid-1x2-fill"></i><span>Inicio</span></a>
+        <a href="ventas.html"><i class="bi bi-receipt-cutoff"></i><span>Ventas</span></a>
+        <a href="historico-ventas.html"><i class="bi bi-clock-history"></i><span>Historico ventas</span></a>
+        <a href="retiros-caja.html"><i class="bi bi-cash-coin"></i><span>Retiros de caja</span></a>
+        <a href="cierre-caja.html"><i class="bi bi-cash-stack"></i><span>Cierre de caja</span></a>
+        <a href="inventario.html"><i class="bi bi-box-seam"></i><span>Inventario</span></a>
+        <a class="active" href="clientes.html"><i class="bi bi-people"></i><span>Clientes</span></a>
+        <a href="reportes.html"><i class="bi bi-clipboard-data"></i><span>Reportes</span></a>
+        <a href="soporte.html"><i class="bi bi-life-preserver"></i><span>Soporte</span></a>
+        <a href="configuracion.html"><i class="bi bi-gear"></i><span>Configuracion</span></a>
+      </nav>
+      <div class="sidebar-session">
+        <span>Sesion activa</span>
+        <strong id="sessionUser">Administrador</strong>
+        <small id="sessionLoginAt">--</small>
+      </div>
+    </aside>
+    <main class="app-main">
+      <header class="app-topbar"><div><p class="section-kicker">Clientes</p><h1>Gestion de clientes</h1></div></header>
+
+      <section class="report-summary-grid client-summary-grid">
+        <article class="report-summary-card client-summary-card">
+          <span>Total clientes</span>
+          <strong id="clientsMetricCount">0</strong>
+          <small>Base activa registrada en el sistema.</small>
+        </article>
+        <article class="report-summary-card client-summary-card">
+          <span>Cliente top</span>
+          <strong id="clientsMetricTop">Sin datos</strong>
+          <small id="clientsMetricTopMeta">Aun no hay compras suficientes.</small>
+        </article>
+        <article class="report-summary-card client-summary-card">
+          <span>Puntos acumulados</span>
+          <strong id="clientsMetricPoints">0</strong>
+          <small>Saldo total disponible para redencion.</small>
+        </article>
+        <article class="report-summary-card client-summary-card">
+          <span>Valor acumulado</span>
+          <strong id="clientsMetricRevenue">$ 0</strong>
+          <small>Consumo historico de toda la cartera.</small>
+        </article>
+      </section>
+
+      <section class="two-col-grid wide-left">
+        <article class="module-card">
+          <div class="module-head">
+            <div><h2>Directorio</h2><p>Consulta rapida con foco en frecuencia, puntos y valor comercial.</p></div>
+          </div>
+          <div class="client-toolbar">
+            <div class="form-field">
+              <label for="clientSearchInput">Buscar cliente</label>
+              <input id="clientSearchInput" class="form-control" type="text" placeholder="Nombre, documento o telefono">
+            </div>
+          </div>
+          <div id="clientCards" class="client-grid"></div>
+        </article>
+
+        <article class="module-card">
+          <div class="module-head">
+            <div><h2>Nuevo cliente</h2><p>Registro rapido para fidelizacion y seguimiento comercial.</p></div>
+          </div>
+          <div class="client-spotlight" id="clientSpotlight"></div>
+          <form id="clientForm" class="form-stack">
+            <input id="clientId" type="hidden">
+            <div class="form-field"><label for="clientName">Nombre</label><input id="clientName" class="form-control" type="text" required></div>
+            <div class="form-field"><label for="clientDoc">Documento</label><input id="clientDoc" class="form-control" type="text" required></div>
+            <div class="form-field"><label for="clientPhone">Telefono</label><input id="clientPhone" class="form-control" type="text"></div>
+            <div class="form-field">
+              <label for="clientActive">Estado</label>
+              <select id="clientActive" class="form-select">
+                <option value="SI">Activo</option>
+                <option value="NO">Inactivo</option>
+              </select>
+            </div>
+            <div class="checkout-row">
+              <button class="btn btn-brand" id="clientSaveButton" type="submit">Guardar cliente</button>
+              <button class="btn btn-outline-secondary" id="clientResetButton" type="button">Limpiar</button>
+            </div>
+          </form>
+        </article>
+      </section>
+
+      <section class="module-card mt-4">
+        <div class="module-head"><div><h2>Tabla de clientes</h2><p>Lectura administrativa con valor acumulado y nivel comercial.</p></div></div>
+        <div class="table-responsive">
+          <table class="table align-middle clean-table">
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Documento</th>
+                <th>Telefono</th>
+                <th>Nivel</th>
+                <th>Compras</th>
+                <th>Puntos</th>
+                <th>Total acumulado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="clientsTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="farmapos-data.js"></script>
+</body>
+</html>

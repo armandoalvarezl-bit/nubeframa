@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Farma POS | Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="pos.css">
+</head>
+<body data-page="dashboard">
+  <div class="app-shell">
+    <aside class="app-sidebar">
+      <div class="brand-box"><img class="brand-logo" src="assets/logo/logo-farmapos.png" alt="Logo Farma POS"><div><strong>Farma POS</strong><span>Sistema comercial</span></div></div>
+      <nav class="app-nav">
+        <a class="active" href="dashboard.html"><i class="bi bi-grid-1x2-fill"></i><span>Inicio</span></a>
+        <a href="ventas.html"><i class="bi bi-receipt-cutoff"></i><span>Ventas</span></a>
+        <a href="historico-ventas.html"><i class="bi bi-clock-history"></i><span>Historico ventas</span></a>
+        <a href="retiros-caja.html"><i class="bi bi-cash-coin"></i><span>Retiros de caja</span></a>
+        <a href="cierre-caja.html"><i class="bi bi-cash-stack"></i><span>Cierre de caja</span></a>
+        <a href="inventario.html"><i class="bi bi-box-seam"></i><span>Inventario</span></a>
+        <a href="promociones.html"><i class="bi bi-megaphone"></i><span>Promociones</span></a>
+        <a href="backups.html"><i class="bi bi-shield-check"></i><span>Backups</span></a>
+        <a href="clientes.html"><i class="bi bi-people"></i><span>Clientes</span></a>
+        <a href="reportes.html"><i class="bi bi-clipboard-data"></i><span>Reportes</span></a>
+        <a href="soporte.html"><i class="bi bi-life-preserver"></i><span>Soporte</span></a>
+        <a href="configuracion.html"><i class="bi bi-gear"></i><span>Configuracion</span></a>
+      </nav>
+    </aside>
+    <main class="app-main">
+      <header class="app-topbar">
+        <div><p class="section-kicker">Inicio</p><h1></h1></div>
+        <div class="dashboard-session-bar">
+          <div class="session-chip">
+            <span class="session-chip-label">Usuario</span>
+            <strong id="sessionUser">Administrador</strong>
+          </div>
+          <div class="session-chip">
+            <span class="session-chip-label">Rol</span>
+            <strong data-session-role="true">Cajero</strong>
+          </div>
+          <div class="session-chip">
+            <span class="session-chip-label">Ingreso</span>
+            <strong id="sessionLoginAt">--</strong>
+          </div>
+          <a class="btn btn-brand" href="ventas.html">Ir a ventas</a>
+          <button class="btn btn-outline-secondary" id="logoutButton" type="button">Cerrar sesion</button>
+        </div>
+      </header>
+      <section class="dashboard-pharmacy-banner">
+        <div class="dashboard-pharmacy-copy">
+          <span class="dashboard-pharmacy-kicker">Farmacia activa</span>
+          <strong id="dashboardPharmacyName">Farma POS</strong>
+          <p id="dashboardPharmacyMeta">Configura los datos de la farmacia para personalizar el sistema.</p>
+        </div>
+        <div class="dashboard-pharmacy-badges">
+          <div class="dashboard-badge">
+            <span>Ciudad</span>
+            <strong id="dashboardPharmacyCity">Sin configurar</strong>
+          </div>
+          <div class="dashboard-badge">
+            <span>Contacto</span>
+            <strong id="dashboardPharmacyPhone">Sin configurar</strong>
+          </div>
+          <div class="dashboard-badge">
+            <span>Plan</span>
+            <strong id="dashboardLicensePlan">Anual</strong>
+          </div>
+          <div class="dashboard-badge">
+            <span>Licencia</span>
+            <strong id="dashboardLicenseStatus">Sin licencia</strong>
+          </div>
+          <div class="dashboard-badge">
+            <span>Vigencia</span>
+            <strong id="dashboardLicenseRemaining">--</strong>
+          </div>
+          <div class="dashboard-badge">
+            <span>Fecha de corte</span>
+            <strong id="dashboardLicenseCutoff">--</strong>
+          </div>
+          <a class="btn btn-outline-secondary" href="configuracion.html">Editar datos</a>
+        </div>
+      </section>
+      <section class="dashboard-hero dashboard-hero-upgraded">
+        <div class="hero-card main dashboard-main-card">
+          <div class="dashboard-main-copy">
+            <p class="section-kicker text-white-50">Centro de control</p>
+            <h2>Opera la farmacia con visibilidad total sobre caja, ventas e inventario</h2>
+            <p>
+              Revisa el estado del negocio en segundos, detecta alertas y entra a los modulos
+              clave con una estructura pensada para operación diaria.
+            </p>
+          </div>
+          <div class="hero-links">
+            <a class="btn btn-light" href="ventas.html">Registrar venta</a>
+            <a class="btn btn-outline-light" href="inventario.html">Ver inventario</a>
+            <a class="btn btn-outline-light" href="reportes.html">Abrir reportes</a>
+          </div>
+          <div class="dashboard-main-strip">
+            <div>
+              <strong>Estado</strong>
+              <span>Operación activa</span>
+            </div>
+            <div>
+              <strong>Cliente top</strong>
+              <span id="dashboardTopClient">Cliente general</span>
+            </div>
+            <div>
+              <strong>Último ticket</strong>
+              <span id="dashboardLastTicket">Sin ventas</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-stack dashboard-side-stack">
+          <div class="metric-tile metric-tile-primary">
+            <small>Ventas del día</small>
+            <strong id="dailySalesValue">$ 0</strong>
+            <span id="dailySalesCount">0 transacciones</span>
+          </div>
+          <div class="metric-tile">
+            <small>Caja disponible</small>
+            <strong id="cashValue">$ 0</strong>
+            <span>Efectivo registrado</span>
+          </div>
+          <div class="metric-tile metric-tile-soft">
+            <small>Flujo del negocio</small>
+            <strong id="homeUnitsSold">0</strong>
+            <span>Unidades vendidas acumuladas</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="dashboard-shortcuts">
+        <a class="shortcut-card" href="ventas.html">
+          <i class="bi bi-receipt-cutoff"></i>
+          <strong>Ventas</strong>
+          <span>Crear una nueva venta y emitir ticket</span>
+        </a>
+        <a class="shortcut-card" href="inventario.html">
+          <i class="bi bi-box-seam"></i>
+          <strong>Inventario</strong>
+          <span>Ver existencias, alertas y valor actual</span>
+        </a>
+        <a class="shortcut-card" href="clientes.html">
+          <i class="bi bi-people"></i>
+          <strong>Clientes</strong>
+          <span>Consultar clientes frecuentes y registrar nuevos</span>
+        </a>
+        <a class="shortcut-card" href="reportes.html">
+          <i class="bi bi-clipboard-data"></i>
+          <strong>Reportes</strong>
+          <span>Analizar ingresos, ticket promedio y categorías</span>
+        </a>
+      </section>
+
+      <section class="dashboard-shortcuts">
+        <a class="shortcut-card" href="promociones.html">
+          <i class="bi bi-megaphone"></i>
+          <strong>Promociones</strong>
+          <span>Aplicar descuentos y dinamizar el POS</span>
+        </a>
+        <a class="shortcut-card" href="backups.html">
+          <i class="bi bi-shield-check"></i>
+          <strong>Backups</strong>
+          <span>Respaldar y restaurar el estado del sistema</span>
+        </a>
+      </section>
+
+      <section class="kpi-grid dashboard-kpis">
+        <article class="kpi-card accent">
+          <small>Productos</small>
+          <strong id="inventoryCountValue">0</strong>
+          <span id="lowStockValue">0 con stock bajo</span>
+        </article>
+        <article class="kpi-card">
+          <small>Clientes</small>
+          <strong id="clientCountValue">0</strong>
+          <span id="frequentClientValue">0 compras frecuentes</span>
+        </article>
+        <article class="kpi-card">
+          <small>Ticket promedio</small>
+          <strong id="homeAverageTicket">$ 0</strong>
+          <span>Promedio por venta</span>
+        </article>
+        <article class="kpi-card">
+          <small>Salud del stock</small>
+          <strong id="dashboardStockHealth">Estable</strong>
+          <span>Lectura rápida de inventario</span>
+        </article>
+      </section>
+
+      <section class="kpi-grid dashboard-kpis">
+        <article class="kpi-card">
+          <small>Promociones activas</small>
+          <strong id="dashboardPromoCount">0</strong>
+          <span id="dashboardPromoMeta">Sin descuentos configurados</span>
+        </article>
+        <article class="kpi-card">
+          <small>Compras</small>
+          <strong id="dashboardPurchaseCount">0</strong>
+          <span id="dashboardPurchaseMeta">Abastecimiento acumulado</span>
+        </article>
+      </section>
+
+      <section class="dashboard-bottom-grid">
+        <article class="module-card dashboard-module dashboard-module-alerts">
+          <div class="module-head">
+            <div>
+              <h2>Alertas rápidas</h2>
+              <p>Eventos que requieren atención inmediata.</p>
+            </div>
+            <a href="inventario.html" class="module-link">Ir a inventario</a>
+          </div>
+          <div id="homeAlerts" class="stack-list"></div>
+        </article>
+
+        <article class="module-card dashboard-module dashboard-module-activity">
+          <div class="module-head">
+            <div>
+              <h2>Actividad reciente</h2>
+              <p>Últimas ventas guardadas en el sistema.</p>
+            </div>
+            <a href="ventas.html" class="module-link">Ir a ventas</a>
+          </div>
+          <div id="recentSalesList" class="stack-list"></div>
+        </article>
+
+        <article class="module-card dashboard-module dashboard-module-summary">
+          <div class="module-head">
+            <div>
+              <h2>Estado general</h2>
+              <p>Lectura ejecutiva del negocio.</p>
+            </div>
+          </div>
+          <div class="status-summary-list">
+            <div><span>Inventario activo</span><strong id="dashboardInventorySummary">0 productos</strong></div>
+            <div><span>Clientes registrados</span><strong id="dashboardClientSummary">0 clientes</strong></div>
+            <div><span>Ventas registradas</span><strong id="dashboardSalesSummary">0 ventas</strong></div>
+            <div><span>Valor caja</span><strong id="dashboardCashSummary">$ 0</strong></div>
+            <div><span>NIT / documento</span><strong id="dashboardPharmacyNit">Sin configurar</strong></div>
+          </div>
+        </article>
+
+        <article class="module-card dashboard-module">
+          <div class="module-head">
+            <div>
+              <h2>Top productos</h2>
+              <p>Los articulos con mayor salida dentro del historico actual.</p>
+            </div>
+          </div>
+          <div id="dashboardTopProducts" class="stack-list"></div>
+        </article>
+
+        <article class="module-card dashboard-module">
+          <div class="module-head">
+            <div>
+              <h2>Stock critico y vencimientos</h2>
+              <p>Vigilancia ejecutiva para quiebres y riesgo sanitario.</p>
+            </div>
+          </div>
+          <div id="dashboardRiskList" class="stack-list"></div>
+        </article>
+      </section>
+    </main>
+  </div>
+  <script src="farmapos-data.js"></script>
+</body>
+</html>

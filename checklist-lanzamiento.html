@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Farma POS | Checklist de Lanzamiento</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="pos.css">
+  <style>
+    .launch-shell {
+      display: grid;
+      grid-template-columns: 330px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .launch-sidebar {
+      padding: 1.25rem;
+      border-right: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(16px);
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+    }
+
+    .launch-sidebar-card {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid var(--border);
+      border-radius: 1.5rem;
+      box-shadow: var(--shadow-soft);
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .launch-sidebar-card h2 {
+      margin: 0 0 .85rem;
+      font-size: .84rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+    }
+
+    .launch-nav,
+    .launch-actions,
+    .launch-grid {
+      display: grid;
+      gap: .75rem;
+    }
+
+    .launch-nav a,
+    .launch-btn {
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+      padding: .85rem .95rem;
+      border-radius: 1rem;
+      text-decoration: none;
+      font-weight: 800;
+      color: var(--text);
+      border: 1px solid var(--border);
+      background: #fff;
+    }
+
+    .launch-nav a:hover,
+    .launch-btn:hover {
+      color: var(--primary-dark);
+      border-color: rgba(255, 106, 61, .22);
+      background: rgba(255, 106, 61, .06);
+    }
+
+    .launch-btn.is-primary {
+      justify-content: center;
+      background: linear-gradient(135deg, #ff8358 0%, #ff6a3d 55%, #eb5227 100%);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 16px 30px rgba(255, 106, 61, .22);
+    }
+
+    .launch-btn.is-primary:hover {
+      color: #fff;
+    }
+
+    .launch-main {
+      padding: 1.5rem;
+    }
+
+    .launch-hero {
+      background: linear-gradient(135deg, #173040 0%, #205268 44%, #2e7c73 100%);
+      color: #fff;
+      border-radius: 2rem;
+      padding: 1.6rem;
+      box-shadow: var(--shadow-strong);
+    }
+
+    .launch-hero p {
+      max-width: 60ch;
+      color: rgba(255, 255, 255, .82);
+      line-height: 1.8;
+    }
+
+    .launch-pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .65rem;
+      margin-top: 1rem;
+    }
+
+    .launch-pill {
+      padding: .55rem .85rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .12);
+      border: 1px solid rgba(255, 255, 255, .16);
+      color: #fff;
+      font-size: .86rem;
+      font-weight: 800;
+    }
+
+    .launch-grid {
+      margin-top: 1rem;
+    }
+
+    .launch-checklist {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: .8rem;
+    }
+
+    .launch-checklist li {
+      display: grid;
+      grid-template-columns: 2rem minmax(0, 1fr);
+      gap: .9rem;
+      align-items: start;
+      padding: .95rem 1rem;
+      border-radius: 1rem;
+      background: var(--soft);
+      border: 1px solid var(--border);
+    }
+
+    .launch-check {
+      width: 2rem;
+      height: 2rem;
+      display: grid;
+      place-items: center;
+      border-radius: .75rem;
+      background: rgba(46, 124, 115, .12);
+      color: #2e7c73;
+      font-weight: 900;
+    }
+
+    .launch-highlight {
+      padding: 1rem 1.1rem;
+      border-radius: 1.25rem;
+      background: rgba(46, 124, 115, .08);
+      border: 1px solid rgba(46, 124, 115, .15);
+      color: #27554f;
+      line-height: 1.7;
+    }
+
+    @media (max-width: 1080px) {
+      .launch-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .launch-sidebar {
+        position: static;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="launch-shell">
+    <aside class="launch-sidebar">
+      <div class="brand-box">
+        <img class="brand-logo" src="assets/logo/logo-farmapos.png" alt="Logo Farma POS">
+        <div>
+          <strong>Farma POS</strong>
+          <span>Sistema comercial</span>
+        </div>
+      </div>
+
+      <div class="launch-sidebar-card">
+        <h2>Documento</h2>
+        <div class="list-card">
+          <strong>Checklist de lanzamiento</strong>
+          <span>Control rapido para salir a vender e instalar sin sorpresas.</span>
+        </div>
+      </div>
+
+      <div class="launch-sidebar-card">
+        <h2>Bloques</h2>
+        <nav class="launch-nav">
+          <a href="#producto"><i class="bi bi-box-seam"></i><span>Producto</span></a>
+          <a href="#infraestructura"><i class="bi bi-hdd-network"></i><span>Infraestructura</span></a>
+          <a href="#instalacion"><i class="bi bi-pc-display"></i><span>Instalacion</span></a>
+          <a href="#comercial"><i class="bi bi-megaphone"></i><span>Comercial</span></a>
+          <a href="#operacion"><i class="bi bi-people"></i><span>Operacion interna</span></a>
+          <a href="#piloto"><i class="bi bi-rocket-takeoff"></i><span>Piloto</span></a>
+          <a href="#minimo"><i class="bi bi-check2-square"></i><span>Minimo viable</span></a>
+        </nav>
+      </div>
+
+      <div class="launch-sidebar-card">
+        <h2>Navegacion</h2>
+        <div class="launch-actions">
+          <a class="launch-btn is-primary" href="configuracion.html"><i class="bi bi-arrow-left-circle"></i><span>Volver a Configuracion</span></a>
+          <a class="launch-btn" href="dashboard.html"><i class="bi bi-house-door"></i><span>Ir al Panel Principal</span></a>
+          <a class="launch-btn" href="manual-usuario.html"><i class="bi bi-journal-richtext"></i><span>Abrir Manual</span></a>
+          <a class="launch-btn" href="plan-comercial.html"><i class="bi bi-cash-coin"></i><span>Ver Plan Comercial</span></a>
+        </div>
+      </div>
+    </aside>
+
+    <main class="launch-main">
+      <header class="app-topbar">
+        <div>
+          <p class="section-kicker">Documentacion interna</p>
+          <h1>Checklist de lanzamiento</h1>
+        </div>
+      </header>
+
+      <section class="launch-hero">
+        <p class="section-kicker text-white-50">Salida a produccion</p>
+        <h2>Todo lo que deben revisar antes de instalar, vender y escalar Farma POS</h2>
+        <p>Usen esta vista como control operativo antes de vender masivamente. Les ayuda a no olvidar producto, soporte, instalacion, comercial y piloto.</p>
+        <div class="launch-pill-row">
+          <span class="launch-pill">Instalador estable</span>
+          <span class="launch-pill">Licencias activas</span>
+          <span class="launch-pill">Soporte online</span>
+          <span class="launch-pill">Clientes piloto</span>
+        </div>
+      </section>
+
+      <div class="launch-grid">
+        <section class="module-card" id="producto">
+          <div class="module-head"><div><h2>Producto</h2><p>Pruebas funcionales clave antes de salir.</p></div></div>
+          <ul class="launch-checklist">
+            <li><span class="launch-check">1</span><div>Probar login con licencia activa y empresa asociada.</div></li>
+            <li><span class="launch-check">2</span><div>Validar roles por empresa: `admin_empresa`, `supervisor` y `cajero`.</div></li>
+            <li><span class="launch-check">3</span><div>Probar ventas, historico, retiros, cierres e inventario.</div></li>
+            <li><span class="launch-check">4</span><div>Confirmar ticket con logo y datos del negocio.</div></li>
+            <li><span class="launch-check">5</span><div>Probar licencias quincenales, mensuales y anuales.</div></li>
+          </ul>
+        </section>
+
+        <section class="module-card" id="infraestructura">
+          <div class="module-head"><div><h2>Infraestructura</h2><p>Base tecnica para soporte y estabilidad.</p></div></div>
+          <ul class="launch-checklist">
+            <li><span class="launch-check">1</span><div>Desplegar `support-api` en un servidor online.</div></li>
+            <li><span class="launch-check">2</span><div>Ejecutar esquema SQL y configurar `supportApiUrl` y `supportApiKey`.</div></li>
+            <li><span class="launch-check">3</span><div>Definir backup de base central y backups por empresa.</div></li>
+            <li><span class="launch-check">4</span><div>Confirmar soporte remoto con internet desde otro equipo.</div></li>
+          </ul>
+        </section>
+
+        <section class="module-card" id="instalacion">
+          <div class="module-head"><div><h2>Instalacion</h2><p>Lo minimo que deben probar en un PC distinto.</p></div></div>
+          <ul class="launch-checklist">
+            <li><span class="launch-check">1</span><div>Generar instalador final y probar instalacion limpia.</div></li>
+            <li><span class="launch-check">2</span><div>Validar activacion de licencia en el primer equipo.</div></li>
+            <li><span class="launch-check">3</span><div>Probar liberacion y reasignacion de equipos.</div></li>
+            <li><span class="launch-check">4</span><div>Revisar apertura de la app despues de reinicio.</div></li>
+          </ul>
+        </section>
+
+        <section class="module-card" id="comercial">
+          <div class="module-head"><div><h2>Comercial</h2><p>Base de venta y cierre con el cliente.</p></div></div>
+          <ul class="launch-checklist">
+            <li><span class="launch-check">1</span><div>Definir precios finales por plan y por numero de equipos.</div></li>
+            <li><span class="launch-check">2</span><div>Definir politica de renovacion y cambio de equipo.</div></li>
+            <li><span class="launch-check">3</span><div>Preparar brochure, PDF comercial y mensaje corto de WhatsApp.</div></li>
+          </ul>
+        </section>
+
+        <section class="module-card" id="operacion">
+          <div class="module-head"><div><h2>Operacion interna</h2><p>Responsables y flujo de trabajo del equipo.</p></div></div>
+          <ul class="launch-checklist">
+            <li><span class="launch-check">1</span><div>Tener formato para empresa nueva y usuarios iniciales.</div></li>
+            <li><span class="launch-check">2</span><div>Tener flujo de soporte y escalamiento.</div></li>
+            <li><span class="launch-check">3</span><div>Definir responsable tecnico y responsable comercial.</div></li>
+          </ul>
+        </section>
+
+        <section class="module-card" id="piloto">
+          <div class="module-head"><div><h2>Piloto</h2><p>Ultimo filtro antes de escalar ventas.</p></div></div>
+          <ul class="launch-checklist">
+            <li><span class="launch-check">1</span><div>Activar un cliente interno de prueba.</div></li>
+            <li><span class="launch-check">2</span><div>Activar 2 o 3 clientes piloto reales.</div></li>
+            <li><span class="launch-check">3</span><div>Recoger errores y ajustar antes de venta masiva.</div></li>
+          </ul>
+        </section>
+
+        <section class="module-card" id="minimo">
+          <div class="module-head"><div><h2>Minimo para salir a vender</h2><p>Si quieren empezar esta semana, esto es lo indispensable.</p></div></div>
+          <div class="launch-highlight">
+            Licencias por plan funcionando, instalador estable, soporte online operativo, al menos un cliente piloto activo, material comercial basico y una politica clara de precios, renovacion y equipos.
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
