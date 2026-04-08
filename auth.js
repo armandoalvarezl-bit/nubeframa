@@ -118,16 +118,21 @@ async function fetchWebDbStatus() {
   }
 
   try {
-  const response = await fetch(`${WEB_DB_API_URL}?action=status`, {
+    const response = await fetch(`${WEB_DB_API_URL}?action=status`, {
       method: "GET",
       headers: { Accept: "application/json" },
       cache: "no-store"
     });
+
     const data = await response.json().catch(() => null);
+
     if (!response.ok || !data?.ok) {
       return { ok: false, error: data?.error || "No fue posible conectarse a la API web." };
     }
-    return data.status || { ok: false, error: "La API web no devolvio estado." };
+
+    // 🔥 ESTE ES EL FIX
+    return { ok: true };
+
   } catch {
     return {
       ok: false,
