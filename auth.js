@@ -118,7 +118,7 @@ async function fetchWebDbStatus() {
   }
 
   try {
-    const response = await fetch(`${WEB_DB_API_URL}/v1/db/status`, {
+  const response = await fetch(`${WEB_DB_API_URL}?action=status`, {
       method: "GET",
       headers: { Accept: "application/json" },
       cache: "no-store"
