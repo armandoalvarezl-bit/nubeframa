@@ -30,7 +30,7 @@ const APP_TIME_ZONE = "America/Bogota";
 const WEB_DB_API_STORAGE_KEY = "farmapos_web_db_api_url";
 const DAILY_WELCOME_STORAGE_KEY = "farmapos_daily_welcome_seen";
 const SESSION_WELCOME_STORAGE_KEY = "farmapos_session_welcome_seen";
-const INVENTORY_API_URL = "https://script.google.com/macros/s/AKfycbxCfpvKwlU21QJUxXaDjlMwIvS5KTOQRSayDgw2KHVOTqum1n6bZd5BIArI-Nem8VfwsQ/exec";
+const INVENTORY_API_URL = "https://script.google.com/macros/s/AKfycbzHUL3P2stEDpjjbUh3pr4wGO6_KNAPv18KLz3Y8DiGuscV06esTduDmEhpe63yUqWS/exec";
 const desktopDb = window.farmaposDesktop?.db || null;
 const browserStorage = window.sessionStorage;
 const persistentStorage = window.localStorage;
@@ -126,7 +126,7 @@ function resolveWebDbApiUrl() {
   }
 
   if (protocol === "http:" || protocol === "https:" || protocol === "file:") {
-    return "http://127.0.0.1:8787";
+    return "https://script.google.com/macros/s/AKfycbzHUL3P2stEDpjjbUh3pr4wGO6_KNAPv18KLz3Y8DiGuscV06esTduDmEhpe63yUqWS/exec";
   }
 
   return "";
@@ -3413,7 +3413,7 @@ function printHtmlDocument(documentHtml, blockedMessage) {
         image.addEventListener("error", finish, { once: true });
       });
 
-      window.setTimeout(finish, 2500);
+      window.setTimeout(finish, 6000);
     });
 
     waitForFrameAssets().then(() => {
@@ -9220,26 +9220,11 @@ function buildTicketHtml(sale) {
         </div>
       </header>
 
-      <section class="ticket-meta-grid">
-        <div class="ticket-meta-card">
-          <span>Ticket</span>
-          <strong>${escapeHtml(sale.ticketNumber)}</strong>
-        </div>
-        <div class="ticket-meta-card">
-          <span>Fecha</span>
-          <strong>${escapeHtml(formatDisplayDate(sale.date))}</strong>
-        </div>
-        <div class="ticket-meta-card">
-          <span>Hora</span>
-          <strong>${escapeHtml(sale.time)}</strong>
-        </div>
-        <div class="ticket-meta-card">
-          <span>Estado</span>
-          <strong>${escapeHtml(isAnnulled ? "ANULADA" : "ACTIVA")}</strong>
-        </div>
-      </section>
-
       <section class="ticket-block">
+        <div class="ticket-row"><span>Ticket</span><strong>${escapeHtml(sale.ticketNumber)}</strong></div>
+        <div class="ticket-row"><span>Fecha</span><strong>${escapeHtml(formatDisplayDate(sale.date))}</strong></div>
+        <div class="ticket-row"><span>Hora</span><strong>${escapeHtml(sale.time)}</strong></div>
+        <div class="ticket-row"><span>Estado</span><strong>${escapeHtml(isAnnulled ? "ANULADA" : "ACTIVA")}</strong></div>
         <div class="ticket-row"><span>Cliente</span><strong>${escapeHtml(sale.clientName)}</strong></div>
         <div class="ticket-row"><span>Documento</span><strong>${escapeHtml(sale.clientDocument || "Consumidor final")}</strong></div>
         <div class="ticket-row"><span>Metodo de pago</span><strong>${escapeHtml(sale.paymentMethod)}</strong></div>
@@ -9295,14 +9280,16 @@ function closeTicket() {
   if (modal) modal.hidden = true;
 }
 
-function printCurrentTicket() {
+async function printCurrentTicket() {
   if (!state.lastTicketHtml) return;
 
   const printDocument = buildTicketPrintableDocument(state.lastTicketHtml);
   printHtmlDocument(printDocument, "El navegador bloqueo la ventana de impresion. Permite ventanas emergentes e intentalo de nuevo.");
 }
 
-function buildTicketPrintableDocument(ticketHtml, title = "") {
+function buildTicketPrintableDocument(ticketHtml, title = "", options = {}) {
+  const shouldAutoPrint = options.autoPrint !== false;
+
   return `
     <!DOCTYPE html>
     <html lang="es">
@@ -9312,19 +9299,23 @@ function buildTicketPrintableDocument(ticketHtml, title = "") {
       <title>${escapeHtml(title || `Ticket ${state.sales[state.sales.length - 1]?.ticketNumber || ""}`)}</title>
       <style>
         :root {
-          --text: #193040;
-          --muted: #718295;
-          --border: rgba(25, 48, 64, 0.18);
-          --primary: #ff6a3d;
+          --text: #000;
+          --muted: #000;
+          --border: #000;
+          --primary: #000;
         }
         * { box-sizing: border-box; }
+        html {
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
         html, body {
           margin: 0;
           padding: 0;
           background: #fff;
           color: var(--text);
           font-family: "Courier New", monospace;
-          font-weight: 600;
+          font-weight: 900;
         }
         body {
           display: grid;
@@ -9339,7 +9330,8 @@ function buildTicketPrintableDocument(ticketHtml, title = "") {
           border: 1px dashed var(--border);
           border-radius: 14px;
           background: #fff;
-          font-size: 11px;
+          font-size: 12px;
+          line-height: 1.34;
         }
         .ticket-receipt {
           position: relative;
@@ -9362,22 +9354,22 @@ function buildTicketPrintableDocument(ticketHtml, title = "") {
           font-family: Arial, sans-serif;
           font-size: 20px;
           font-weight: 800;
-          letter-spacing: .18em;
-          color: rgba(25, 48, 64, .08);
+          letter-spacing: 0;
+          color: rgba(0, 0, 0, .04);
         }
         .ticket-watermark span {
           font-family: Arial, sans-serif;
           font-size: 12px;
           font-weight: 700;
-          letter-spacing: .32em;
+          letter-spacing: 0;
           text-transform: uppercase;
-          color: rgba(255, 106, 61, .12);
+          color: rgba(0, 0, 0, .04);
         }
         .ticket-watermark.is-annulled strong {
-          color: rgba(190, 38, 55, .16);
+          color: rgba(0, 0, 0, .08);
         }
         .ticket-watermark.is-annulled span {
-          color: rgba(190, 38, 55, .22);
+          color: rgba(0, 0, 0, .08);
         }
         .ticket-brand {
           display: grid;
@@ -9391,18 +9383,18 @@ function buildTicketPrintableDocument(ticketHtml, title = "") {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          width: 56px;
-          height: 56px;
+          width: 48px;
+          height: 48px;
           overflow: hidden;
-          border-radius: 16px;
+          border-radius: 10px;
           color: #fff;
-          background: linear-gradient(135deg, #132c43, var(--primary));
+          background: #000;
           font-family: sans-serif;
           font-weight: 800;
         }
         .ticket-brand-logo {
-          width: 56px;
-          height: 56px;
+          width: 48px;
+          height: 48px;
           object-fit: contain;
         }
         .ticket-brand-copy {
@@ -9412,8 +9404,8 @@ function buildTicketPrintableDocument(ticketHtml, title = "") {
         }
         .ticket-center { text-align: center; }
         .ticket-center h3, .ticket-center p { margin: 0; }
-        .ticket-center h3 { font-size: 16px; font-weight: 800; line-height: 1.15; }
-        .ticket-pharmacy-line { font-size: 10px; line-height: 1.3; }
+        .ticket-center h3 { font-size: 16px; font-weight: 900; line-height: 1.18; }
+        .ticket-pharmacy-line { font-size: 11px; line-height: 1.34; font-weight: 900; }
         .ticket-muted { color: var(--muted); }
         .ticket-status-pill {
           display: inline-flex;
@@ -9424,39 +9416,41 @@ function buildTicketPrintableDocument(ticketHtml, title = "") {
           border-radius: 999px;
           font-family: Arial, sans-serif;
           font-size: 10px;
-          font-weight: 800;
-          letter-spacing: .08em;
+          font-weight: 900;
+          letter-spacing: 0;
           text-transform: uppercase;
         }
         .ticket-status-pill.is-active {
-          color: #1f6f43;
-          background: rgba(31, 111, 67, .12);
+          color: #000;
+          background: #fff;
+          border: 1px solid #000;
         }
         .ticket-status-pill.is-annulled {
-          color: #9f1d2e;
-          background: rgba(190, 38, 55, .12);
+          color: #000;
+          background: #fff;
+          border: 1px solid #000;
         }
         .ticket-meta-grid {
-          display: grid;
-          grid-template-columns: repeat(4, minmax(0,1fr));
-          gap: 5px;
+          display: none;
         }
         .ticket-meta-card {
           padding: 7px 5px;
           border-radius: 9px;
-          background: rgba(25,48,64,.05);
+          background: #fff;
+          border: 1px solid #000;
           text-align: center;
           font-family: sans-serif;
         }
         .ticket-meta-card span,
         .ticket-meta-card strong { display: block; }
-        .ticket-meta-card strong { font-weight: 800; }
+        .ticket-meta-card strong { font-weight: 900; }
         .ticket-meta-card span {
           margin-bottom: 3px;
           color: var(--muted);
-          font-size: 9px;
+          font-size: 9.5px;
+          font-weight: 900;
           text-transform: uppercase;
-          letter-spacing: .04em;
+          letter-spacing: 0;
         }
         .ticket-block,
         .ticket-totals {
@@ -9470,30 +9464,48 @@ function buildTicketPrintableDocument(ticketHtml, title = "") {
           margin-bottom: 4px;
           font-family: sans-serif;
           font-size: 10px;
-          font-weight: 800;
-          color: #4a6072;
+          font-weight: 900;
+          color: #000;
           text-transform: uppercase;
-          letter-spacing: .05em;
+          letter-spacing: 0;
         }
         .ticket-row,
         .ticket-item-head,
         .ticket-item-meta {
           display: flex;
           justify-content: space-between;
-          gap: 10px;
+          gap: 8px;
           align-items: baseline;
         }
+        .ticket-row span {
+          flex: 0 0 auto;
+          max-width: 42%;
+        }
+        .ticket-row strong {
+          min-width: 0;
+          max-width: 58%;
+          overflow-wrap: anywhere;
+          text-align: right;
+        }
+        .ticket-item-head strong:first-child {
+          min-width: 0;
+          overflow-wrap: anywhere;
+        }
+        .ticket-item-head strong:last-child {
+          flex: 0 0 auto;
+          text-align: right;
+        }
         .ticket-row strong,
-        .ticket-item-head strong { font-weight: 800; }
+        .ticket-item-head strong { font-weight: 900; }
         .ticket-row span,
-        .ticket-item-meta { color: var(--muted); }
+        .ticket-item-meta { color: var(--muted); font-weight: 900; }
         .ticket-items {
           display: grid;
           gap: 7px;
         }
         .ticket-item {
           padding-bottom: 7px;
-          border-bottom: 1px dashed rgba(25,48,64,.12);
+          border-bottom: 1px dashed #000;
         }
         .ticket-item:last-child {
           padding-bottom: 0;
@@ -9504,7 +9516,7 @@ function buildTicketPrintableDocument(ticketHtml, title = "") {
           padding-top: 7px;
           border-top: 1px dashed var(--border);
           font-size: 13px;
-          font-weight: 800;
+          font-weight: 900;
         }
         .ticket-footer {
           display: grid;
@@ -9515,16 +9527,16 @@ function buildTicketPrintableDocument(ticketHtml, title = "") {
         .ticket-footer p { margin: 0; }
         .ticket-soft-signature {
           margin-top: 4px !important;
-          font-size: 9px;
-          font-weight: 800;
-          letter-spacing: .03em;
+          font-size: 10px;
+          font-weight: 900;
+          letter-spacing: 0;
           text-transform: uppercase;
-          color: #3e5568;
+          color: #000;
         }
         .ticket-soft-contact {
-          font-size: 9px;
+          font-size: 10px;
           color: var(--muted);
-          font-weight: 700;
+          font-weight: 900;
         }
         .ticket-qr-block {
           display: grid;
@@ -9534,13 +9546,13 @@ function buildTicketPrintableDocument(ticketHtml, title = "") {
           border-top: 1px dashed var(--border);
         }
         .ticket-qr-image {
-          width: 104px;
-          height: 104px;
+          width: 86px;
+          height: 86px;
           object-fit: contain;
           padding: 6px;
-          border-radius: 12px;
+          border-radius: 0;
           background: #fff;
-          border: 1px solid rgba(25,48,64,.12);
+          border: 1px solid #000;
         }
         .ticket-qr-copy {
           display: grid;
@@ -9549,13 +9561,14 @@ function buildTicketPrintableDocument(ticketHtml, title = "") {
           font-family: sans-serif;
         }
         .ticket-qr-copy strong {
-          font-size: 11px;
-          letter-spacing: .08em;
+          font-size: 10px;
+          letter-spacing: 0;
           text-transform: uppercase;
         }
         .ticket-qr-copy span {
           color: var(--muted);
           font-size: 9px;
+          font-weight: 900;
           line-height: 1.35;
         }
         @page {
@@ -9564,23 +9577,64 @@ function buildTicketPrintableDocument(ticketHtml, title = "") {
         }
         @media print {
           body { padding: 0; }
+          * {
+            color: #000 !important;
+            text-shadow: none !important;
+            box-shadow: none !important;
+          }
           .ticket-paper {
             width: auto;
             border: 0;
             border-radius: 0;
-            padding: 2mm 2.5mm;
+            padding: 3mm 2.5mm;
+            font-size: 12px;
+            line-height: 1.35;
+          }
+          .ticket-brand-mark,
+          .ticket-status-pill,
+          .ticket-meta-card,
+          .ticket-qr-image {
+            background: #fff !important;
+            color: #000 !important;
+            border-color: #000 !important;
+          }
+          .ticket-brand-logo {
+            filter: grayscale(1) contrast(1.35);
+          }
+          .ticket-watermark {
+            display: none;
+          }
+          .ticket-qr-block {
+            display: grid;
+            page-break-inside: avoid;
+            break-inside: avoid;
+          }
+          .ticket-qr-image {
+            width: 78px;
+            height: 78px;
+            padding: 2px;
+          }
+          .ticket-brand-mark {
+            width: auto;
+            height: auto;
+            min-width: 0;
+            border: 0 !important;
+          }
+          .ticket-brand-logo {
+            display: block;
+            filter: grayscale(1) contrast(1.7);
           }
         }
       </style>
     </head>
     <body>
       <div class="ticket-paper">${ticketHtml}</div>
-      <script>
+      ${shouldAutoPrint ? `<script>
         window.addEventListener("load", function() {
           window.print();
           window.setTimeout(function() { window.close(); }, 300);
         });
-      <\/script>
+      <\/script>` : ""}
     </body>
     </html>
   `;

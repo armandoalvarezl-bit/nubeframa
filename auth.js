@@ -63,7 +63,7 @@ function resolveWebDbApiUrl() {
   }
 
   if (protocol === "http:" || protocol === "https:" || protocol === "file:") {
-    return "http://127.0.0.1:8787";
+    return "https://script.google.com/macros/s/AKfycbzHUL3P2stEDpjjbUh3pr4wGO6_KNAPv18KLz3Y8DiGuscV06esTduDmEhpe63yUqWS/exec";
   }
 
   return "";
@@ -75,7 +75,7 @@ function isWebDbApiEnabled() {
 
 async function fetchWebDbApi(path, payload) {
   if (!isWebDbApiEnabled()) {
-    throw new Error("No hay una API web configurada para MariaDB. Inicia la API en http://127.0.0.1:8787 o configura la URL en pos.html.");
+    throw new Error("No hay una API web configurada. Verifica la URL del Apps Script en pos.html.");
   }
   try {
     const isAppsScript = isAppsScriptWebDbUrl();

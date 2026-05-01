@@ -17,7 +17,9 @@
     "electron-builder": "^25.1.8"
   },
   "dependencies": {
-    "mysql2": "^3.11.3"
+    "express": "^5.2.1",
+    "mysql2": "^3.11.3",
+    "node-fetch": "^2.7.0"
   },
   "build": {
     "appId": "com.farmapos.desktop",
@@ -25,7 +27,6 @@
     "icon": "icon.ico",
     "files": [
       "**/*",
-      "!db.config.json",
       "!farmapos/**",
       "!plantilla-online/**",
       "!*.gs",
@@ -41,7 +42,9 @@
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ]
     },

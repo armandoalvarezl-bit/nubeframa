@@ -2,7 +2,7 @@
   "host": "localhost",
   "port": 3306,
   "user": "root",
-  "password": "P.2025@",
+  "password": "admin",
   "database": "db_posfarma",
   "supportApiUrl": "",
   "supportApiKey": ""
