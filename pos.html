@@ -14,137 +14,88 @@
 </head>
 <body class="auth-body" data-login-scope="main">
   <main class="auth-shell">
-    <section class="auth-stage">
-      <div class="auth-hero auth-hero-phone">
-        <div class="auth-phone-topbar">
-          <span class="auth-phone-search-icon"></span>
+    <section class="auth-brand-panel" aria-label="NubeFarma">
+      <div class="auth-brand-watermark">?</div>
+      <div class="auth-brand-content">
+        <img class="auth-hero-logo" src="assets/logo/logo-nubefarma-clean.png" alt="NubeFarma">
+        <span class="auth-brand-line"></span>
+        <p>Plataforma integral para la administración de tu farmacia.</p>
+        <div class="auth-benefits">
+          <article>
+            <i class="bi bi-shield-check"></i>
+            <strong>Seguro</strong>
+            <span>Protegemos tu información con acceso autorizado.</span>
+          </article>
+          <article>
+            <i class="bi bi-bar-chart-line"></i>
+            <strong>Inteligente</strong>
+            <span>Herramientas claras para operar con eficiencia.</span>
+          </article>
+          <article>
+            <i class="bi bi-clock-history"></i>
+            <strong>Disponible</strong>
+            <span>Acceso web + API para mantener tu negocio activo.</span>
+          </article>
         </div>
-        <div class="auth-phone-awning">
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
-        <div class="auth-phone-body">
-          <div class="auth-phone-bag">
-            <span></span>
-            <span></span>
-          </div>
-        </div>
-      </div>
-      <div class="auth-hero auth-hero-card">
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
-      <div class="auth-hero auth-hero-ticket">
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
-      <div class="auth-hero auth-hero-tag">
-        <span>%</span>
-      </div>
-      <div class="auth-hero auth-hero-cart">
-        <div class="auth-cart-basket">
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
-        <div class="auth-cart-handle"></div>
-        <div class="auth-cart-wheel auth-cart-wheel-a"></div>
-        <div class="auth-cart-wheel auth-cart-wheel-b"></div>
-      </div>
-      <div class="auth-hero auth-hero-coins">
-        <span class="auth-coin auth-coin-main">$</span>
-        <span class="auth-coin auth-coin-stack auth-coin-stack-a"></span>
-        <span class="auth-coin auth-coin-stack auth-coin-stack-b"></span>
       </div>
     </section>
 
     <section class="auth-card">
       <div class="auth-card-frame">
         <div class="auth-card-logo">
-          <img class="auth-card-logo-image" src="assets/logo-nubefarma-clean.png" alt="Logo Farma POS">
+          <img class="auth-card-logo-image" src="assets/logo/logo-nubefarma-clean.png" alt="Logo Farma POS">
         </div>
-
         <div class="auth-card-intro">
-          <p class="section-kicker auth-kicker-center">Sistema de facturacion</p>
-          <p class="auth-welcome-line"><strong>Bienvenido</strong> Por favor inicia con tu cuenta de usuario.</p>
-        </div>
-
-        <div class="auth-info-panel auth-info-panel-compact">
-          <strong>Todo en un solo lugar</strong>
-          <ul class="auth-info-list">
-            <li>Ventas, inventario y reportes en una sola vista.</li>
-            <li>Acceso seguro con validacion de usuarios en linea.</li>
-          </ul>
-        </div>
-
-        <div class="auth-card-top">
-          <div class="brand-box auth-brand">
-            <div><strong id="authBrandName">Farma POS</strong><span>Acceso principal</span></div>
-          </div>
-          <div class="auth-card-chip">
-            <i class="bi bi-shield-check"></i>
-            <span>Validacion segura</span>
-          </div>
-        </div>
-
-        <div class="auth-head">
-          <h2>Iniciar sesion</h2>
+          <h1>Acceso de empresas</h1>
+          <span></span>
           <p>Ingresa con tu usuario autorizado para entrar al dashboard principal.</p>
         </div>
-
+        <form id="loginForm" class="form-stack auth-form">
+          <div class="auth-form-panel">
+            <div class="auth-form-fields">
+              <div class="form-field" id="loginLicenseField" hidden>
+                <label for="loginLicense">Licencia</label>
+                <input id="loginLicense" class="form-control" type="text" autocomplete="off" placeholder="Código de licencia activa">
+              </div>
+              <div class="form-field">
+                <label for="loginUsername">Usuario</label>
+                <div class="auth-input-wrap">
+                  <i class="bi bi-person-fill"></i>
+                  <input id="loginUsername" class="form-control" type="text" autocomplete="username" placeholder="Usuario" required>
+                </div>
+              </div>
+              <div class="form-field">
+                <label for="loginPassword">Contraseña</label>
+                <div class="auth-password-wrap">
+                  <i class="bi bi-lock-fill"></i>
+                  <input id="loginPassword" class="form-control" type="password" autocomplete="current-password" placeholder="Ingresa tu clave" required>
+                  <button class="icon-action auth-password-toggle" id="togglePassword" type="button" aria-label="Mostrar contraseña">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="auth-form-bottom">
+              <div class="auth-form-hint">
+                <i class="bi bi-shield-check"></i>
+                <span id="loginLicenseHint">Acceso seguro con usuario autorizado.</span>
+              </div>
+              <button class="btn btn-brand w-100 auth-submit" type="submit">
+                <span>Entrar al sistema</span>
+                <i class="bi bi-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        </form>
         <div class="auth-access-switch">
           <a class="auth-access-link" href="login-interno.html">
             <i class="bi bi-person-badge"></i>
             <span>Acceso interno FarmaPOS</span>
           </a>
         </div>
-
-        <form id="loginForm" class="form-stack auth-form">
-          <div class="auth-form-caption">
-            <span></span>
-            <small>Ingreso protegido</small>
-          </div>
-          <div class="auth-form-panel">
-            <div class="auth-form-panel-head">
-              <strong>Credenciales</strong>
-              <span>Validacion de licencia y usuarios contra MariaDB</span>
-            </div>
-
-            <div class="auth-form-fields">
-              <div class="form-field" id="loginLicenseField">
-                <label for="loginLicense">Licencia</label>
-                <input id="loginLicense" class="form-control" type="text" autocomplete="off" placeholder="Codigo de licencia activa">
-              </div>
-              <div class="form-field">
-                <label for="loginUsername">Usuario</label>
-                <input id="loginUsername" class="form-control" type="text" autocomplete="username" placeholder="Usuario" required>
-              </div>
-              <div class="form-field">
-                <label for="loginPassword">Contrasena</label>
-                <div class="auth-password-wrap">
-                  <input id="loginPassword" class="form-control" type="password" autocomplete="current-password" placeholder="Ingresa tu clave" required>
-                  <button class="icon-action auth-password-toggle" id="togglePassword" type="button" aria-label="Mostrar contrasena">
-                    <i class="bi bi-eye"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div class="auth-form-bottom">
-              <div class="auth-form-hint">
-                <i class="bi bi-shield-check"></i>
-                <span id="loginLicenseHint">Acceso seguro con licencia activa y usuario autorizado.</span>
-              </div>
-              <button class="btn btn-brand w-100 auth-submit" type="submit">Entrar al sistema</button>
-            </div>
-          </div>
-        </form>
         <div class="auth-error" id="loginError" hidden></div>
         <div class="auth-version" data-app-version>Version Desktop</div>
+        <span id="authBrandName" hidden>Farma POS</span>
       </div>
     </section>
   </main>

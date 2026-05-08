@@ -124,11 +124,8 @@
                 <label class="settings-field"><span>Prefijo</span><input id="dianPrefix" type="text" placeholder="SETP" maxlength="20"></label>
                 <label class="settings-field"><span>Resolucion</span><input id="dianResolution" type="text" placeholder="18760000001" maxlength="40"></label>
                 <label class="settings-field wide"><span>Software ID</span><input id="dianSoftwareId" type="text" placeholder="UUID o identificador del software" maxlength="120"></label>
-                <label class="settings-field"><span>PIN software</span><input id="dianSoftwarePin" type="password" placeholder="PIN entregado" maxlength="80"></label>
-                <label class="settings-field wide"><span>Certificado P12 / PFX</span><input id="dianCertificateName" type="text" placeholder="nombre-certificado.p12" maxlength="120"></label>
-                <label class="settings-field"><span>Clave certificado</span><input id="dianCertificatePassword" type="password" placeholder="Clave del certificado" maxlength="120"></label>
-                <label class="settings-field wide"><span>URL servicio</span><input id="dianApiUrl" type="text" placeholder="https://..." maxlength="200"></label>
-                <label class="settings-field wide"><span>Observaciones</span><input id="dianTestSetId" type="text" placeholder="TestSetId, notas o identificador de prueba" maxlength="160"></label>
+                <label class="settings-field wide"><span>URL servicio</span><input id="dianApiUrl" type="text" placeholder="http://127.0.0.1:8788/dian" maxlength="200"></label>
+                <label class="settings-field wide"><span>TestSetId / Observaciones</span><input id="dianTestSetId" type="text" placeholder="TestSetId o referencia de prueba" maxlength="160"></label>
               </div>
               <div class="settings-form-actions">
                 <p class="settings-form-note" id="dianConfigSummary">Aun no hay configuracion DIAN guardada en este equipo.</p>
@@ -136,7 +133,7 @@
                   <button class="btn btn-outline-secondary" id="testDianConfig" type="button">Validar configuracion</button>
                   <button class="btn btn-outline-secondary" id="generateDianTestInvoice" type="button">Generar factura prueba</button>
                   <button class="btn btn-outline-secondary" id="downloadDianTestJson" type="button">Descargar JSON</button>
-                  <button class="btn btn-outline-secondary" id="simulateDianSend" type="button">Simular envio</button>
+                  <button class="btn btn-outline-secondary" id="simulateDianSend" type="button">Enviar prueba</button>
                   <button class="btn btn-outline-secondary" id="resetDianConfig" type="button">Limpiar</button>
                   <button class="btn btn-brand" type="submit">Guardar prueba</button>
                 </div>
@@ -145,6 +142,13 @@
             <div class="settings-restricted-note">
               <i class="bi bi-file-earmark-text"></i>
               <span id="dianTestResultSummary">Aun no se ha generado ninguna factura electronica de prueba.</span>
+            </div>
+            <div class="settings-restricted-note" id="dianTestResultDetails" hidden>
+              <div class="settings-form-note"><strong>CUFE:</strong> <span id="dianTestResultCufe">-</span></div>
+              <div class="settings-form-note"><strong>QR factura electronica:</strong></div>
+              <div class="settings-qr-preview">
+                <img id="dianTestResultQrImage" src="" alt="QR factura DIAN" />
+              </div>
             </div>
           </article>
           <article class="module-card settings-quick-card">

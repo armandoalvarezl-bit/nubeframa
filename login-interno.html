@@ -14,137 +14,88 @@
 </head>
 <body class="auth-body" data-login-scope="internal">
   <main class="auth-shell">
-    <section class="auth-stage">
-      <div class="auth-hero auth-hero-phone">
-        <div class="auth-phone-topbar">
-          <span class="auth-phone-search-icon"></span>
+    <section class="auth-brand-panel" aria-label="NubeFarma">
+      <div class="auth-brand-watermark">?</div>
+      <div class="auth-brand-content">
+        <img class="auth-hero-logo" src="assets/logo/logo-nubefarma-clean.png" alt="NubeFarma">
+        <span class="auth-brand-line"></span>
+        <p>Plataforma integral para la administración, soporte y desarrollo de tu farmacia.</p>
+        <div class="auth-benefits">
+          <article>
+            <i class="bi bi-shield-check"></i>
+            <strong>Seguro</strong>
+            <span>Protegemos tu información con altos estándares de seguridad.</span>
+          </article>
+          <article>
+            <i class="bi bi-bar-chart-line"></i>
+            <strong>Inteligente</strong>
+            <span>Herramientas inteligentes para una gestión eficiente.</span>
+          </article>
+          <article>
+            <i class="bi bi-clock-history"></i>
+            <strong>Disponible</strong>
+            <span>Acceso 24/7 para mantener tu operación siempre activa.</span>
+          </article>
         </div>
-        <div class="auth-phone-awning">
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
-        <div class="auth-phone-body">
-          <div class="auth-phone-bag">
-            <span></span>
-            <span></span>
-          </div>
-        </div>
-      </div>
-      <div class="auth-hero auth-hero-card">
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
-      <div class="auth-hero auth-hero-ticket">
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
-      <div class="auth-hero auth-hero-tag">
-        <span>%</span>
-      </div>
-      <div class="auth-hero auth-hero-cart">
-        <div class="auth-cart-basket">
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
-        <div class="auth-cart-handle"></div>
-        <div class="auth-cart-wheel auth-cart-wheel-a"></div>
-        <div class="auth-cart-wheel auth-cart-wheel-b"></div>
-      </div>
-      <div class="auth-hero auth-hero-coins">
-        <span class="auth-coin auth-coin-main">$</span>
-        <span class="auth-coin auth-coin-stack auth-coin-stack-a"></span>
-        <span class="auth-coin auth-coin-stack auth-coin-stack-b"></span>
       </div>
     </section>
 
     <section class="auth-card auth-card-internal">
       <div class="auth-card-frame">
         <div class="auth-card-logo">
-          <img class="auth-card-logo-image" src="assets/logo/logo-nubefarma-clean.png" alt="Logo NubeFarma">
+          <img class="auth-card-logo-image" src="assets/logo/logo-nubefarma-clean.png" alt="Logo NubeFarma" data-static-logo>
         </div>
-
         <div class="auth-card-intro">
-          <p class="section-kicker auth-kicker-center">Acceso interno</p>
-          <p class="auth-welcome-line"><strong>Equipo FarmaPOS.</strong> Ingresa con tu cuenta de soporte y desarrollo.</p>
+          <h1>Acceso interno</h1>
+          <span></span>
+          <p>Ingresa con tu cuenta de soporte y desarrollo.</p>
         </div>
-
-        <div class="auth-info-panel auth-info-panel-compact auth-info-panel-internal">
-          <strong>Uso interno</strong>
-          <ul class="auth-info-list">
-            <li>Acceso sin licencia para administracion, soporte y desarrollo.</li>
-            <li>Utiliza solo usuarios globales como admin u operador.</li>
-          </ul>
-        </div>
-
-        <div class="auth-card-top">
-          <div class="brand-box auth-brand">
-            <div><strong id="authBrandName">NubeFarma Interno</strong><span>Soporte y desarrollo</span></div>
-          </div>
-          <div class="auth-card-chip">
-            <i class="bi bi-shield-lock"></i>
-            <span>Acceso interno</span>
-          </div>
-        </div>
-
-        <div class="auth-head">
-          <h2>Ingresar al panel interno</h2>
-          <p>Este acceso es exclusivo para el equipo FarmaPOS y no requiere licencia de empresa.</p>
-        </div>
-
-        <div class="auth-access-switch">
-          <a class="auth-access-link" href="pos.html">
-            <i class="bi bi-arrow-left-circle"></i>
-            <span>Volver al acceso de empresas</span>
-          </a>
-        </div>
-
         <form id="loginForm" class="form-stack auth-form">
-          <div class="auth-form-caption">
-            <span></span>
-            <small>Ingreso interno protegido</small>
-          </div>
           <div class="auth-form-panel">
-            <div class="auth-form-panel-head">
-              <strong>Credenciales internas</strong>
-              <span>Acceso global para soporte, administracion y desarrollo.</span>
-            </div>
-
             <div class="auth-form-fields">
               <div class="form-field" id="loginLicenseField" hidden>
                 <label for="loginLicense">Licencia</label>
                 <input id="loginLicense" class="form-control" type="text" autocomplete="off" placeholder="No requerido en acceso interno">
               </div>
               <div class="form-field">
-                <label for="loginUsername">Usuario</label>
-                <input id="loginUsername" class="form-control" type="text" autocomplete="username" placeholder="Usuario interno" required>
+                <label for="loginUsername">Usuario interno</label>
+                <div class="auth-input-wrap">
+                  <i class="bi bi-person-fill"></i>
+                  <input id="loginUsername" class="form-control" type="text" autocomplete="username" placeholder="Usuario interno" required>
+                </div>
               </div>
               <div class="form-field">
-                <label for="loginPassword">Contrasena</label>
+                <label for="loginPassword">Contraseña</label>
                 <div class="auth-password-wrap">
-                  <input id="loginPassword" class="form-control" type="password" autocomplete="current-password" placeholder="Ingresa tu clave" required>
-                  <button class="icon-action auth-password-toggle" id="togglePassword" type="button" aria-label="Mostrar contrasena">
+                  <i class="bi bi-lock-fill"></i>
+                  <input id="loginPassword" class="form-control" type="password" autocomplete="current-password" placeholder="Ingresa tu contraseña" required>
+                  <button class="icon-action auth-password-toggle" id="togglePassword" type="button" aria-label="Mostrar contraseña">
                     <i class="bi bi-eye"></i>
                   </button>
                 </div>
               </div>
             </div>
-
             <div class="auth-form-bottom">
               <div class="auth-form-hint">
-                <i class="bi bi-tools"></i>
-                <span id="loginLicenseHint">Usa aqui solo usuarios internos globales del equipo FarmaPOS.</span>
+                <i class="bi bi-lock-fill"></i>
+                <span id="loginLicenseHint">Este acceso es exclusivo para el equipo FarmaPOS y no requiere licencia de empresa.</span>
               </div>
-              <button class="btn btn-brand w-100 auth-submit" type="submit">Entrar al panel interno</button>
+              <button class="btn btn-brand w-100 auth-submit" type="submit">
+                <span>Entrar al panel interno</span>
+                <i class="bi bi-arrow-right"></i>
+              </button>
             </div>
           </div>
         </form>
+        <div class="auth-access-switch">
+          <a class="auth-access-link" href="pos.html">
+            <i class="bi bi-building"></i>
+            <span>Volver al acceso de empresas</span>
+          </a>
+        </div>
         <div class="auth-error" id="loginError" hidden></div>
         <div class="auth-version" data-app-version>Version Desktop</div>
+        <span id="authBrandName" hidden>NubeFarma Interno</span>
       </div>
     </section>
   </main>

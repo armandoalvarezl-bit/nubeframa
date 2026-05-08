@@ -136,9 +136,13 @@ function isWebDbApiEnabled() {
   return Boolean(WEB_DB_API_URL);
 }
 
+function getWebDbApiLabel() {
+  return isAppsScriptWebDbUrl() ? "Google Apps Script" : "API web";
+}
+
 async function fetchWebDbApiJson(path, options = {}, timeoutMs = 15000) {
   if (!isWebDbApiEnabled()) {
-    throw new Error("La API web de MariaDB no esta configurada.");
+    throw new Error("La API web no esta configurada.");
   }
 
   try {
@@ -160,13 +164,13 @@ async function fetchWebDbApiJson(path, options = {}, timeoutMs = 15000) {
     const data = await fetchJsonWithTimeout(request.url, request.fetchOptions, timeoutMs);
 
     if (!data?.ok) {
-      throw new Error(data?.error || "No fue posible completar la operacion en MariaDB.");
+      throw new Error(data?.error || `No fue posible completar la operacion en ${getWebDbApiLabel()}.`);
     }
 
     return data;
   } catch (error) {
     if (error instanceof TypeError) {
-      throw new Error(`No fue posible conectarse a la API web de MariaDB en ${WEB_DB_API_URL}.`);
+      throw new Error(`No fue posible conectarse a ${getWebDbApiLabel()} en ${WEB_DB_API_URL}. Verifica la publicacion y permisos de la aplicacion web.`);
     }
     throw error;
   }
@@ -514,13 +518,13 @@ function getDefaultDianConfig() {
   return {
     environment: "test",
     providerMode: "direct",
-    prefix: "",
-    resolution: "",
+    prefix: "SETP",
+    resolution: "18760000001",
     softwareId: "",
     softwarePin: "",
     certificateName: "",
     certificatePassword: "",
-    apiUrl: "",
+    apiUrl: "http://127.0.0.1:8787/dian",
     testSetId: ""
   };
 }
@@ -553,12 +557,16 @@ function getDefaultDianTestResult() {
   return {
     generatedAt: "",
     simulatedAt: "",
+    sentAt: "",
+    cancelledAt: "",
     status: "",
     saleId: "",
     ticketNumber: "",
     invoiceNumber: "",
     environment: "",
     simulationId: "",
+    cufe: "",
+    qrUrl: "",
     payload: null
   };
 }
@@ -568,12 +576,16 @@ function normalizeDianTestResult(result) {
   return {
     generatedAt: String(result?.generatedAt || "").trim(),
     simulatedAt: String(result?.simulatedAt || "").trim(),
+    sentAt: String(result?.sentAt || "").trim(),
+    cancelledAt: String(result?.cancelledAt || "").trim(),
     status: String(result?.status || "").trim(),
     saleId: String(result?.saleId || "").trim(),
     ticketNumber: String(result?.ticketNumber || "").trim(),
     invoiceNumber: String(result?.invoiceNumber || "").trim(),
     environment: String(result?.environment || "").trim(),
     simulationId: String(result?.simulationId || "").trim(),
+    cufe: String(result?.cufe || "").trim(),
+    qrUrl: String(result?.qrUrl || "").trim(),
     payload: result?.payload && typeof result.payload === "object" ? result.payload : base.payload
   };
 }
@@ -593,7 +605,9 @@ function getDianTestResultSummary(result = state.dianTestResult) {
     normalized.status || "Generada",
     normalized.environment === "production" ? "Produccion" : "Pruebas"
   ];
-  if (normalized.simulatedAt) {
+  if (normalized.sentAt) {
+    parts.push(`Envio ${formatSessionDateTime(normalized.sentAt)}`);
+  } else if (normalized.simulatedAt) {
     parts.push(`Envio ${formatSessionDateTime(normalized.simulatedAt)}`);
   } else if (normalized.generatedAt) {
     parts.push(`Generada ${formatSessionDateTime(normalized.generatedAt)}`);
@@ -611,7 +625,7 @@ function buildDianTestInvoiceFromSale(sale, config = state.dianConfig) {
   const issueTime = String(sale?.time || new Date().toLocaleTimeString("es-CO", { hour12: false })).trim();
 
   return {
-    profileExecutionId: crypto.randomUUID(),
+    profileExecutionId: getRandomUuid(),
     generatedAt: new Date().toISOString(),
     environment: normalizedConfig.environment,
     providerMode: normalizedConfig.providerMode,
@@ -658,9 +672,9 @@ function buildDianTestInvoiceFromSale(sale, config = state.dianConfig) {
           description: item.name || "Producto",
           quantity: Number(item.quantity || 0),
           unitPrice: Number(item.price || 0),
-          lineExtensionAmount: Number(item.originalSubtotal || 0),
+          lineExtensionAmount: Number(item.originalSubtotal ?? (Number(item.quantity || 0) * Number(item.price || 0))),
           discountAmount: Number(item.promoDiscount || 0),
-          lineTotal: Number(item.lineTotal || 0)
+          lineTotal: Number(item.lineTotal ?? (Number(item.quantity || 0) * Number(item.price || 0) - Number(item.promoDiscount || 0)))
         }))
       : []
   };
@@ -672,8 +686,124 @@ function downloadJsonFile(payload, filename = "dian-test.json") {
   const link = document.createElement("a");
   link.href = url;
   link.download = filename;
+  link.style.display = "none";
+  document.body.appendChild(link);
   link.click();
+  document.body.removeChild(link);
   URL.revokeObjectURL(url);
+}
+
+function getDianInvoiceQrText(payload = {}) {
+  const parts = [
+    payload.invoiceNumber ? `Factura: ${payload.invoiceNumber}` : "",
+    payload.testSetId ? `TestSetId: ${payload.testSetId}` : "",
+    payload.documentType ? payload.documentType : "",
+    payload.issueDate ? `Fecha: ${payload.issueDate}` : ""
+  ].filter(Boolean);
+  return parts.join(" | ");
+}
+
+function getDianInvoiceQrUrl(payload = {}) {
+  const text = getDianInvoiceQrText(payload);
+  if (!text) return "";
+  return `https://quickchart.io/qr?size=240&margin=1&text=${encodeURIComponent(text)}`;
+}
+
+async function saveDianConfigToDb(config = state.dianConfig) {
+  if (!isDesktopDbEnabled() || !window.farmaposDesktop?.db?.saveDianConfig) return null;
+  return await window.farmaposDesktop.db.saveDianConfig(getDesktopCompanyPayload({ config: normalizeDianConfig(config) }));
+}
+
+async function saveDianTestResultToDb(result = state.dianTestResult) {
+  if (!isDesktopDbEnabled() || !window.farmaposDesktop?.db?.saveDianTestResult) return null;
+  const normalized = normalizeDianTestResult(result);
+  return await window.farmaposDesktop.db.saveDianTestResult(getDesktopCompanyPayload({
+    saleId: normalized.saleId,
+    ticketNumber: normalized.ticketNumber,
+    invoiceNumber: normalized.invoiceNumber,
+    status: normalized.status,
+    environment: normalized.environment,
+    simulationId: normalized.simulationId,
+    generatedAt: normalized.generatedAt,
+    sentAt: normalized.sentAt,
+    cancelledAt: normalized.cancelledAt,
+    cufe: normalized.cufe,
+    qrUrl: normalized.qrUrl,
+    payload: normalized.payload
+  }));
+}
+
+async function cancelDianInvoice(testResult, config = state.dianConfig, reason = "ANULACION_DE_TICKET") {
+  const validation = validateDianConfig(config);
+  if (!validation.ok) {
+    throw new Error(validation.errors.join(" "));
+  }
+
+  const cancellationPayload = {
+    type: "DIAN_CANCEL_INVOICE",
+    config: validation.config,
+    payload: {
+      invoiceNumber: testResult.invoiceNumber,
+      cufe: testResult.cufe || undefined,
+      saleId: testResult.saleId,
+      ticketNumber: testResult.ticketNumber,
+      reason
+    }
+  };
+
+  return await postJsonWithTimeout(validation.config.apiUrl, cancellationPayload);
+}
+
+async function postJsonWithTimeout(url, body, timeoutMs = 30000) {
+  const controller = new AbortController();
+  const timer = window.setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body),
+      signal: controller.signal
+    });
+
+    const text = await response.text();
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${text}`.trim());
+    }
+
+    try {
+      return JSON.parse(text);
+    } catch {
+      return text;
+    }
+  } catch (error) {
+    if (error?.name === "AbortError") {
+      throw new Error("Tiempo de espera agotado al conectar con el servicio DIAN.");
+    }
+    if (error instanceof TypeError) {
+      throw new Error("No fue posible conectar con el servicio DIAN.");
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timer);
+  }
+}
+
+async function sendDianInvoiceToApi(payload, config = state.dianConfig) {
+  const validation = validateDianConfig(config);
+  if (!validation.ok) {
+    throw new Error(validation.errors.join(" "));
+  }
+
+  const requestBody = {
+    type: "DIAN_TEST_INVOICE",
+    config: validation.config,
+    payload
+  };
+
+  return await postJsonWithTimeout(validation.config.apiUrl, requestBody);
 }
 
 function getDianConfigSummary(config = state.dianConfig) {
@@ -684,6 +814,9 @@ function getDianConfigSummary(config = state.dianConfig) {
     normalized.prefix || "Sin prefijo",
     normalized.softwareId ? "Software ID cargado" : "Sin Software ID"
   ];
+  if (normalized.testSetId) {
+    summary.push(`TestSetId: ${normalized.testSetId}`);
+  }
   return summary.join(" · ");
 }
 
@@ -692,13 +825,10 @@ function validateDianConfig(config = state.dianConfig) {
   const errors = [];
 
   if (!normalized.prefix) errors.push("Debes indicar el prefijo de facturacion.");
+  if (!normalized.resolution) errors.push("Debes indicar la resolucion de facturacion.");
   if (!normalized.softwareId) errors.push("Debes indicar el Software ID.");
-  if (!normalized.softwarePin) errors.push("Debes indicar el PIN del software.");
   if (!normalized.apiUrl) errors.push("Debes indicar la URL del servicio.");
-  if (!/^https?:\/\//i.test(normalized.apiUrl)) errors.push("La URL del servicio debe comenzar por http:// o https://.");
-  if (normalized.environment === "test" && !normalized.testSetId) {
-    errors.push("En pruebas conviene registrar el TestSetId o una referencia de habilitacion.");
-  }
+  if (normalized.apiUrl && !/^https?:\/\//i.test(normalized.apiUrl)) errors.push("La URL del servicio debe comenzar por http:// o https://.");
 
   return {
     ok: !errors.length,
@@ -802,6 +932,7 @@ function applyRemotePharmacyProfile(profile) {
 
 function applyImageSourceWithFallback(imageNode, preferredSrc, fallbackSrc, altText) {
   if (!imageNode) return;
+  if (imageNode.dataset.staticLogo) return;
   const safePreferredSrc = String(preferredSrc || "").trim();
   const safeFallbackSrc = String(fallbackSrc || "").trim() || DEFAULT_BRAND_LOGO;
   imageNode.dataset.logoFallback = safeFallbackSrc;
@@ -1460,7 +1591,7 @@ function normalizeInventoryItem(item, index) {
   const imageUrl = getInventoryImageSrc(item);
 
   return {
-    id: String(item.id || name || sku).trim() || crypto.randomUUID(),
+    id: String(item.id || sku || barcode).trim() || crypto.randomUUID(),
     name: name || sku,
     category,
     price: Number.isFinite(price) ? price : 0,
@@ -1603,6 +1734,16 @@ const initialReturns = [];
 const initialPromotions = [];
 const initialAuditLogs = [];
 const RELEASE_NOTES_ITEMS = [
+  {
+    date: "3 de mayo de 2026",
+    title: "Mejoras en la interfaz",
+    detail: "Se optimizó la interfaz del dashboard para mejor rendimiento."
+  },
+  {
+    date: "3 de mayo de 2026",
+    title: "Nuevas funcionalidades",
+    detail: "Se agregó soporte para sincronización en tiempo real de inventario."
+  },
   {
     date: "1 de abril de 2026",
     title: "Accesos mas compactos",
@@ -1881,7 +2022,7 @@ if (isSessionExpired(sessionState)) {
   throw new Error("Sesion expirada.");
 }
 
-if (!["admin", "operador"].includes(String(sessionState?.role || "").trim().toLowerCase()) && !licenseState?.code) {
+if (isDesktopDbEnabled() && !["admin", "operador"].includes(String(sessionState?.role || "").trim().toLowerCase()) && !licenseState?.code) {
   browserStorage.removeItem(STORAGE_KEYS.session);
   saveAuthDebug("dashboard_redirect_no_license", {
     sessionState,
@@ -1965,6 +2106,19 @@ function getDesktopCompanyPayload(payload = {}) {
   }
 
   return { ...payload };
+}
+
+async function getDesktopCompanyInfo(companyId) {
+  if (!companyId || !isDesktopDbEnabled()) return null;
+
+  try {
+    const companies = await desktopDb.getCompanies();
+    const company = companies.find(c => String(c.id) === String(companyId));
+    return company;
+  } catch (error) {
+    console.error('Error obteniendo información de empresa:', error);
+    return null;
+  }
 }
 
 async function addAuditLog(entry) {
@@ -2486,7 +2640,9 @@ async function syncDesktopBootstrapState() {
   if (!isDesktopDbEnabled()) return false;
 
   try {
-    const bootstrap = await desktopDb.bootstrap(getDesktopCompanyPayload());
+    const payload = getDesktopCompanyPayload();
+    const companyId = payload?.companyId;
+    const bootstrap = companyId ? await desktopDb.bootstrapCompany(companyId) : await desktopDb.bootstrap(payload);
     if (!bootstrap) return false;
 
     if (Array.isArray(bootstrap.inventory)) {
@@ -3633,15 +3789,64 @@ async function downloadSalesReport() {
         });
         return;
       }
-      await showInfoDialog(rawMessage || "No fue posible generar el PDF del reporte.", {
-        title: "Error al exportar",
-        variant: "warn"
-      });
-      return;
     }
   }
 
-  printHtmlDocument(documentHtml, "El navegador bloqueo la ventana de impresion.");
+  // Fallback para navegador web: usar html2pdf desde CDN
+  try {
+    if (typeof html2pdf === 'undefined') {
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+      script.async = true;
+      
+      await new Promise((resolve, reject) => {
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+    }
+
+    const element = document.createElement('div');
+    element.innerHTML = documentHtml;
+    element.style.position = 'absolute';
+    element.style.left = '-9999px';
+    element.style.top = '-9999px';
+    element.style.width = '1px';
+    element.style.height = '1px';
+    element.style.overflow = 'hidden';
+    document.body.appendChild(element);
+
+    const opt = {
+      margin: 5,
+      filename: `reporte-${report.meta.key}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { orientation: 'portrait', unit: 'mm', format: 'letter' }
+    };
+
+    await html2pdf().set(opt).from(element).save();
+    document.body.removeChild(element);
+
+    await showInfoDialog("El reporte se guardo en PDF correctamente.", {
+      title: "PDF descargado",
+      variant: "success"
+    });
+    return;
+  } catch (error) {
+    try {
+      printHtmlDocument(documentHtml, "El navegador bloqueo la ventana de impresion.");
+      await showInfoDialog("Se abrio la ventana de impresion. Selecciona 'Guardar como PDF' para descargar.", {
+        title: "Descarga como PDF",
+        variant: "info"
+      });
+      return;
+    } catch (fallbackError) {
+      await showInfoDialog("Intenta nuevamente o usa la función Imprimir del navegador (Ctrl+P).", {
+        title: "No se pudo descargar",
+        variant: "warn"
+      });
+    }
+  }
 }
 
 function renderCashClosurePage() {
@@ -3801,9 +4006,11 @@ function bindCashClosureEvents() {
     openPrintableDocument(`Cierre de caja - ${closure.label}`, buildCashClosureHtml(closure));
   });
 
-  document.getElementById("downloadCashClosure")?.addEventListener("click", () => {
+  document.getElementById("downloadCashClosure")?.addEventListener("click", async () => {
     const closure = getActiveCashClosureModel();
-    downloadTicketHtml(buildCashClosureHtml(closure), `cierre-caja-${closure.date}.html`);
+    const filename = `cierre-caja-${closure.date}.pdf`;
+    const html = buildCashClosureHtml(closure);
+    await downloadTicketPdf(html, filename, `Cierre de caja - ${closure.date}`);
   });
 
   document.getElementById("closureHistoryList")?.addEventListener("click", async (event) => {
@@ -4531,7 +4738,7 @@ function populateInventoryForm(item) {
 
 function readInventoryFormData() {
   const id = document.getElementById("inventoryItemId").value.trim();
-  const sku = document.getElementById("inventorySku").value.trim();
+  let sku = document.getElementById("inventorySku").value.trim();
   const name = document.getElementById("inventoryName").value.trim();
   const category = normalizeCategory(document.getElementById("inventoryCategory").value);
   const price = Number(document.getElementById("inventoryPrice").value || 0);
@@ -4544,12 +4751,25 @@ function readInventoryFormData() {
   const imageUrl = getInventoryFormImageValue();
   const active = document.getElementById("inventoryActive").value || "SI";
 
-  if (!sku || !name) {
-    throw new Error("SKU y nombre son obligatorios.");
+  if (!name) {
+    throw new Error("El nombre del producto es obligatorio.");
+  }
+
+  // Generar SKU automáticamente si no se proporciona
+  if (!sku) {
+    if (barcode) {
+      sku = barcode;
+    } else {
+      // Generar SKU basado en el contador de productos y nombre
+      const categoryPrefix = String(category || "GEN").substring(0, 3).toUpperCase();
+      const inventoryCount = state.inventory ? state.inventory.length : 0;
+      const skuNumber = String(inventoryCount + 1).padStart(5, '0');
+      sku = `${categoryPrefix}-${skuNumber}`;
+    }
   }
 
   return {
-    id: id || name,
+    id: id || sku || barcode,
     sku,
     nombre: name,
     categoria: category,
@@ -4684,20 +4904,50 @@ function normalizeCashTimeValue(value) {
   return text;
 }
 
+function generateTicketNumber(index, dateStr = "") {
+  const sessionCompanyId = String(sessionState?.companyId || "").trim();
+  const companyPrefix = sessionCompanyId
+    ? sessionCompanyId.toUpperCase().slice(0, 3).padEnd(3, "0")
+    : "NUB";
+
+  const date = dateStr ? new Date(dateStr) : new Date();
+  const dateFormatted = `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, "0")}${String(date.getDate()).padStart(2, "0")}`;
+
+  const sequence = String(index + 1).padStart(3, "0");
+
+  return `${companyPrefix}-${dateFormatted}-${sequence}`;
+}
+
+function getRandomUuid() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+
+  const bytes = Array.from({ length: 16 }, () => Math.floor(Math.random() * 256));
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = bytes.map((byte) => byte.toString(16).padStart(2, "0")).join("");
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+
 function normalizeSaleRecord(sale, index) {
+  const dateValue = sale?.date || sale?.fecha || "";
+  const timeValue = sale?.time || sale?.hora || "";
+  const paymentMethod = sale?.paymentMethod || sale?.metodo_pago || sale?.payment_method || "Efectivo";
+
   return {
     id: String(sale?.id || crypto.randomUUID()).trim(),
-    ticketNumber: String(sale?.ticketNumber || `T-${String(index + 1).padStart(4, "0")}`).trim(),
-    clientName: String(sale?.clientName || "Cliente general").trim(),
-    clientDocument: String(sale?.clientDocument || "").trim(),
-    date: normalizeInputDateValue(sale?.date || ""),
-    time: String(sale?.time || "").trim(),
-    paymentMethod: String(sale?.paymentMethod || "Efectivo").trim(),
-    cashReceived: Number(sale?.cashReceived || 0),
-    change: Number(sale?.change || 0),
+    ticketNumber: String(sale?.ticketNumber || sale?.ticket || generateTicketNumber(index, dateValue)).trim(),
+    clientName: String(sale?.clientName || sale?.cliente_nombre || "Cliente general").trim(),
+    clientDocument: String(sale?.clientDocument || sale?.cliente_documento || "").trim(),
+    date: normalizeInputDateValue(dateValue),
+    time: String(timeValue).trim(),
+    paymentMethod: String(paymentMethod).trim(),
+    cashReceived: Number(sale?.cashReceived || sale?.efectivo_recibido || 0),
+    change: Number(sale?.change || sale?.cambio || 0),
     subtotal: Number(sale?.subtotal || 0),
     promoDiscount: Number(sale?.promoDiscount || sale?.promotionDiscount || 0),
-    tax: Number(sale?.tax || 0),
+    tax: Number(sale?.tax || sale?.iva || 0),
     redeemedPoints: Number(sale?.redeemedPoints || sale?.pointsUsed || 0),
     loyaltyDiscount: Number(sale?.loyaltyDiscount || sale?.discountFromPoints || 0),
     earnedPoints: Number(sale?.earnedPoints || 0),
@@ -5097,7 +5347,9 @@ async function registerSaleInApi(sale) {
   if (isDesktopDbEnabled()) {
     const data = await desktopDb.registerSale(getDesktopCompanyPayload(sale));
     applyRemoteSalesState(Array.isArray(data?.sales) ? data.sales : []);
-    const bootstrap = await desktopDb.bootstrap(getDesktopCompanyPayload());
+    const payload = getDesktopCompanyPayload();
+    const companyId = payload?.companyId;
+    const bootstrap = companyId ? await desktopDb.bootstrapCompany(companyId) : await desktopDb.bootstrap(payload);
       if (Array.isArray(bootstrap?.clients)) {
         state.clients = bootstrap.clients.map(normalizeClientRecord);
         saveData();
@@ -5180,7 +5432,9 @@ async function syncPharmacyProfileFromApi() {
 
   if (isDesktopDbEnabled()) {
     try {
-      const bootstrap = await desktopDb.bootstrap(getDesktopCompanyPayload());
+      const payload = getDesktopCompanyPayload();
+      const companyId = payload?.companyId;
+      const bootstrap = companyId ? await desktopDb.bootstrapCompany(companyId) : await desktopDb.bootstrap(payload);
       if (bootstrap?.profile) {
         applyRemotePharmacyProfile(bootstrap.profile);
       }
@@ -5351,12 +5605,17 @@ async function saveCompanyToApi(company) {
   if (!isAdminSession()) {
     throw new Error("No tienes permisos para editar empresas.");
   }
-  const overview = isDesktopDbEnabled()
-    ? await desktopDb.saveCompany(company)
-    : (await fetchWebDbApiJson("/v1/licensing/companies", {
-        method: "POST",
-        body: JSON.stringify(company || {})
-      })).overview;
+  let overview;
+  if (isDesktopDbEnabled()) {
+    const result = await desktopDb.saveCompany(company);
+    overview = result?.companies ? result : { companies: [], licenses: [], devices: [], history: [] };
+  } else {
+    const response = await fetchWebDbApiJson("/v1/licensing/companies", {
+      method: "POST",
+      body: JSON.stringify(company || {})
+    });
+    overview = response?.overview || { companies: [], licenses: [], devices: [], history: [] };
+  }
   applyLicensingOverview(overview);
   return overview;
 }
@@ -5365,12 +5624,17 @@ async function saveLicenseToApi(license) {
   if (!isAdminSession()) {
     throw new Error("No tienes permisos para editar licencias.");
   }
-  const overview = isDesktopDbEnabled()
-    ? await desktopDb.saveLicense(license)
-    : (await fetchWebDbApiJson("/v1/licensing/licenses", {
-        method: "POST",
-        body: JSON.stringify(license || {})
-      })).overview;
+  let overview;
+  if (isDesktopDbEnabled()) {
+    const result = await desktopDb.saveLicense(license);
+    overview = result?.companies ? result : { companies: [], licenses: [], devices: [], history: [] };
+  } else {
+    const response = await fetchWebDbApiJson("/v1/licensing/licenses", {
+      method: "POST",
+      body: JSON.stringify(license || {})
+    });
+    overview = response?.overview || { companies: [], licenses: [], devices: [], history: [] };
+  }
   applyLicensingOverview(overview);
   return overview;
 }
@@ -5393,12 +5657,17 @@ async function setLicenseStatusInApi(id, status) {
   if (!isAdminSession()) {
     throw new Error("No tienes permisos para cambiar el estado de licencias.");
   }
-  const overview = isDesktopDbEnabled()
-    ? await desktopDb.setLicenseStatus({ id, status })
-    : (await fetchWebDbApiJson(`/v1/licensing/licenses/${encodeURIComponent(String(id || "").trim())}/status`, {
-        method: "POST",
-        body: JSON.stringify({ status })
-      })).overview;
+  let overview;
+  if (isDesktopDbEnabled()) {
+    const result = await desktopDb.setLicenseStatus({ id, status });
+    overview = result?.companies ? result : { companies: [], licenses: [], devices: [], history: [] };
+  } else {
+    const response = await fetchWebDbApiJson(`/v1/licensing/licenses/${encodeURIComponent(String(id || "").trim())}/status`, {
+      method: "POST",
+      body: JSON.stringify({ status })
+    });
+    overview = response?.overview || { companies: [], licenses: [], devices: [], history: [] };
+  }
   applyLicensingOverview(overview);
   return overview;
 }
@@ -5407,12 +5676,17 @@ async function renewLicenseInApi(id) {
   if (!isAdminSession()) {
     throw new Error("No tienes permisos para renovar licencias.");
   }
-  const overview = isDesktopDbEnabled()
-    ? await desktopDb.renewLicense({ id })
-    : (await fetchWebDbApiJson(`/v1/licensing/licenses/${encodeURIComponent(String(id || "").trim())}/renew`, {
-        method: "POST",
-        body: JSON.stringify({})
-      })).overview;
+  let overview;
+  if (isDesktopDbEnabled()) {
+    const result = await desktopDb.renewLicense({ id });
+    overview = result?.companies ? result : { companies: [], licenses: [], devices: [], history: [] };
+  } else {
+    const response = await fetchWebDbApiJson(`/v1/licensing/licenses/${encodeURIComponent(String(id || "").trim())}/renew`, {
+      method: "POST",
+      body: JSON.stringify({})
+    });
+    overview = response?.overview || { companies: [], licenses: [], devices: [], history: [] };
+  }
   applyLicensingOverview(overview);
   return overview;
 }
@@ -5427,15 +5701,20 @@ async function releaseLicenseDeviceInApi(licenseId, installationId) {
     throw new Error("No fue posible identificar la licencia o el equipo que deseas liberar.");
   }
 
-  const overview = isDesktopDbEnabled()
-    ? await desktopDb.releaseLicenseDevice({
-        licenseId: normalizedLicenseId,
-        installationId: normalizedInstallationId
-      })
-    : (await fetchWebDbApiJson(`/v1/licensing/licenses/${encodeURIComponent(normalizedLicenseId)}/devices/${encodeURIComponent(normalizedInstallationId)}/release`, {
-        method: "POST",
-        body: JSON.stringify({})
-      })).overview;
+  let overview;
+  if (isDesktopDbEnabled()) {
+    const result = await desktopDb.releaseLicenseDevice({
+      licenseId: normalizedLicenseId,
+      installationId: normalizedInstallationId
+    });
+    overview = result?.companies ? result : { companies: [], licenses: [], devices: [], history: [] };
+  } else {
+    const response = await fetchWebDbApiJson(`/v1/licensing/licenses/${encodeURIComponent(normalizedLicenseId)}/devices/${encodeURIComponent(normalizedInstallationId)}/release`, {
+      method: "POST",
+      body: JSON.stringify({})
+    });
+    overview = response?.overview || { companies: [], licenses: [], devices: [], history: [] };
+  }
   applyLicensingOverview(overview);
   return overview;
 }
@@ -8174,7 +8453,10 @@ function renderLicensingPage() {
     if (!state.editingLicenseId) companySelect.value = "";
   }
 
-  if (!state.editingCompanyId) resetLicensingCompanyForm();
+  if (state.editingCompanyId) {
+    const company = state.licensingCompanies.find((entry) => entry.id === state.editingCompanyId);
+    if (company) populateLicensingCompanyForm(company);
+  }
   if (!state.editingLicenseId) resetLicensingLicenseForm();
   if (!state.editingUserId) resetUserAdminForm();
   renderUserAdminSection();
@@ -8238,6 +8520,15 @@ function renderLicensingPage() {
 }
 
 async function loadSupportApiConfig() {
+  if (window.farmaposDesktop?.isDesktop) {
+    supportApiConfig = {
+      enabled: true,
+      url: "http://127.0.0.1:8787",
+      apiKey: ""
+    };
+    return supportApiConfig;
+  }
+
   if (!desktopDb?.supportConfig) return supportApiConfig;
 
   try {
@@ -8548,6 +8839,26 @@ function renderSettings() {
   );
   setText("dianConfigSummary", getDianConfigSummary(dianConfig));
   setText("dianTestResultSummary", getDianTestResultSummary(state.dianTestResult));
+
+  const result = normalizeDianTestResult(state.dianTestResult);
+  const resultDetailsNode = document.getElementById("dianTestResultDetails");
+  const cufeNode = document.getElementById("dianTestResultCufe");
+  const qrImage = document.getElementById("dianTestResultQrImage");
+  if (resultDetailsNode) {
+    resultDetailsNode.hidden = !Boolean(result.invoiceNumber);
+  }
+  if (cufeNode) {
+    cufeNode.textContent = result.cufe || "No disponible";
+  }
+  if (qrImage) {
+    if (result.qrUrl) {
+      qrImage.src = result.qrUrl;
+      qrImage.hidden = false;
+    } else {
+      qrImage.src = "";
+      qrImage.hidden = true;
+    }
+  }
 }
 
 function renderSupportPage() {
@@ -8773,21 +9084,36 @@ function findInventoryItemByScannerTerm(search = "") {
   const normalizedScannerSearch = normalizeScannerTerm(search);
   if (!normalizedSearch) return null;
 
-  const exactMatch = state.inventory.find((item) => {
+  const exactBarcodeMatch = state.inventory.find((item) => {
     if (item.active === "NO") return false;
-    return [
-      item.barcode,
-      item.sku,
-      item.id,
-      item.name
-    ].some((value) => {
-      const normalizedValue = normalizeSearchTerm(value);
-      const normalizedScannerValue = normalizeScannerTerm(value);
-      return normalizedValue === normalizedSearch || (!!normalizedScannerSearch && normalizedScannerValue === normalizedScannerSearch);
-    });
+    const normalizedValue = normalizeSearchTerm(item.barcode);
+    const normalizedScannerValue = normalizeScannerTerm(item.barcode);
+    return normalizedValue === normalizedSearch || (!!normalizedScannerSearch && normalizedScannerValue === normalizedScannerSearch);
   });
+  if (exactBarcodeMatch) return exactBarcodeMatch;
 
-  if (exactMatch) return exactMatch;
+  const exactSkuMatch = state.inventory.find((item) => {
+    if (item.active === "NO") return false;
+    const normalizedValue = normalizeSearchTerm(item.sku);
+    const normalizedScannerValue = normalizeScannerTerm(item.sku);
+    return normalizedValue === normalizedSearch || (!!normalizedScannerSearch && normalizedScannerValue === normalizedScannerSearch);
+  });
+  if (exactSkuMatch) return exactSkuMatch;
+
+  const exactIdMatch = state.inventory.find((item) => {
+    if (item.active === "NO") return false;
+    const normalizedValue = normalizeSearchTerm(item.id);
+    const normalizedScannerValue = normalizeScannerTerm(item.id);
+    return normalizedValue === normalizedSearch || (!!normalizedScannerSearch && normalizedScannerValue === normalizedScannerSearch);
+  });
+  if (exactIdMatch) return exactIdMatch;
+
+  const exactNameMatches = state.inventory.filter((item) => {
+    if (item.active === "NO") return false;
+    const normalizedValue = normalizeSearchTerm(item.name);
+    return normalizedValue === normalizedSearch;
+  });
+  if (exactNameMatches.length === 1) return exactNameMatches[0];
 
   const filteredMatches = getSalesSearchMatches(search, getActiveSalesFilter());
   return filteredMatches.length === 1 ? filteredMatches[0] : null;
@@ -8989,6 +9315,23 @@ async function annulSaleById(saleId) {
           annulledBy: supervisorName,
           annulledReason: supervisorReason
         });
+
+        const currentResult = normalizeDianTestResult(state.dianTestResult);
+        if (currentResult.saleId === sale.id && currentResult.status === "ENVIO_REAL_OK") {
+          try {
+            const cancelResponse = await cancelDianInvoice(currentResult, state.dianConfig, supervisorReason);
+            state.dianTestResult = normalizeDianTestResult({
+              ...currentResult,
+              cancelledAt: new Date().toISOString(),
+              status: "ANULACION_REAL_OK"
+            });
+            saveDianTestResult();
+            await saveDianTestResultToDb();
+            console.info("Anulacion DIAN completada:", cancelResponse);
+          } catch (cancelError) {
+            console.warn("No fue posible anular la factura en DIAN:", cancelError);
+          }
+        }
       }, {
         title: "Anulando venta",
         message: "Actualizando estado, stock y cliente en MySQL/MariaDB..."
@@ -9224,7 +9567,7 @@ function buildTicketHtml(sale) {
         <div class="ticket-row"><span>Ticket</span><strong>${escapeHtml(sale.ticketNumber)}</strong></div>
         <div class="ticket-row"><span>Fecha</span><strong>${escapeHtml(formatDisplayDate(sale.date))}</strong></div>
         <div class="ticket-row"><span>Hora</span><strong>${escapeHtml(sale.time)}</strong></div>
-        <div class="ticket-row"><span>Estado</span><strong>${escapeHtml(isAnnulled ? "ANULADA" : "ACTIVA")}</strong></div>
+        <div class="ticket-row ticket-state-row"><span>Estado</span><strong>${escapeHtml(isAnnulled ? "ANULADA" : "ACTIVA")}</strong></div>
         <div class="ticket-row"><span>Cliente</span><strong>${escapeHtml(sale.clientName)}</strong></div>
         <div class="ticket-row"><span>Documento</span><strong>${escapeHtml(sale.clientDocument || "Consumidor final")}</strong></div>
         <div class="ticket-row"><span>Metodo de pago</span><strong>${escapeHtml(sale.paymentMethod)}</strong></div>
@@ -9598,6 +9941,10 @@ function buildTicketPrintableDocument(ticketHtml, title = "", options = {}) {
             color: #000 !important;
             border-color: #000 !important;
           }
+          .ticket-status-pill,
+          .ticket-row.ticket-state-row {
+            display: none !important;
+          }
           .ticket-brand-logo {
             filter: grayscale(1) contrast(1.35);
           }
@@ -9669,18 +10016,80 @@ async function downloadTicketPdf(ticketHtml, filename = "ticket-farmapos.pdf", t
         });
         return;
       }
-      await showInfoDialog(error.message || "No fue posible generar el PDF.", {
-        title: "Error al exportar",
+    }
+  }
+
+  // Fallback para navegador web: usar html2pdf desde CDN
+  try {
+    // Verificar si html2pdf está disponible, si no cargarlo
+    if (typeof html2pdf === 'undefined') {
+      // Cargar html2pdf desde CDN
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+      script.async = true;
+      
+      await new Promise((resolve, reject) => {
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+    }
+
+    // Crear elemento temporal con el HTML
+    const element = document.createElement('div');
+    element.innerHTML = documentHtml;
+    element.style.position = 'absolute';
+    element.style.left = '-9999px';
+    element.style.top = '-9999px';
+    element.style.width = '1px';
+    element.style.height = '1px';
+    element.style.overflow = 'hidden';
+    document.body.appendChild(element);
+
+    // Generar PDF
+    const opt = {
+      margin: 5,
+      filename: pdfFilename,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { orientation: 'portrait', unit: 'mm', format: 'letter' }
+    };
+
+    await html2pdf().set(opt).from(element).save();
+
+    // Limpiar
+    document.body.removeChild(element);
+
+    await showInfoDialog("El ticket se guardo en PDF correctamente.", {
+      title: "PDF descargado",
+      variant: "success"
+    });
+    return;
+  } catch (error) {
+    // Si falla html2pdf, abrir en ventana de impresión
+    try {
+      const printWindow = window.open('', '', 'height=600,width=900');
+      if (printWindow) {
+        printWindow.document.write(documentHtml);
+        printWindow.document.close();
+        printWindow.print();
+        
+        await showInfoDialog("Se abrio la ventana de impresion. Selecciona 'Guardar como PDF' para descargar.", {
+          title: "Descarga como PDF",
+          variant: "info"
+        });
+        return;
+      }
+    } catch (fallbackError) {
+      // Última opción: descargar como HTML
+      downloadTicketHtml(ticketHtml, pdfFilename.replace('.pdf', '.html'));
+      await showInfoDialog("Se descargo como HTML. Puedes abrirlo en el navegador y usar Imprimir para convertir a PDF.", {
+        title: "Archivo descargado",
         variant: "warn"
       });
       return;
     }
   }
-
-  await showInfoDialog("La descarga en PDF esta disponible en la app de escritorio. En navegador puedes usar Imprimir y elegir Guardar como PDF.", {
-    title: "PDF no disponible aqui",
-    variant: "warn"
-  });
 }
 
 function downloadTicketHtml(ticketHtml, filename = "ticket-farmapos.html") {
@@ -9787,7 +10196,7 @@ async function finishSale() {
 
     const fallbackSale = {
       ...draftSale,
-      ticketNumber: `LOCAL-${Date.now()}`
+      ticketNumber: generateTicketNumber(state.sales.length, draftSale.date)
     };
     state.sales.push(fallbackSale);
     state.lastTicketHtml = buildTicketHtml(fallbackSale);
@@ -9949,6 +10358,25 @@ function bindSalesEvents() {
       openingNumber: state.cashClosureDraft.openingNumber || `A-${String(state.cashClosures.length + 1).padStart(4, "0")}`
     };
     saveCashClosureDraft();
+    
+    // Guardar apertura de caja en base de datos si está disponible
+    if (isDesktopDbEnabled() && window.farmaposDesktop?.db?.saveCashDraft) {
+      try {
+        await window.farmaposDesktop.db.saveCashDraft(getDesktopCompanyPayload(state.cashClosureDraft));
+      } catch (error) {
+        console.warn("No fue posible guardar la apertura de caja en MariaDB:", error);
+      }
+    }
+    
+    // Sincronizar inventario desde BD para que aparezcan los productos
+    if (isDesktopDbEnabled()) {
+      try {
+        await syncDesktopBootstrapState();
+      } catch (error) {
+        console.warn("No fue posible sincronizar el inventario al abrir caja:", error);
+      }
+    }
+    
     const printButton = document.getElementById("printOpeningTicketModal");
     if (printButton) {
       printButton.hidden = false;
@@ -10375,8 +10803,18 @@ function bindSettingsEvents() {
       testSetId: document.getElementById("dianTestSetId")?.value
     });
 
-    state.dianConfig = config;
+    const validation = validateDianConfig(config);
+    if (!validation.ok) {
+      await showInfoDialog(validation.errors.join(" "), {
+        title: "Configuracion incompleta",
+        variant: "warn"
+      });
+      return;
+    }
+
+    state.dianConfig = validation.config;
     saveDianConfig();
+    await saveDianConfigToDb();
     renderSettings();
 
     await showInfoDialog("La prueba de configuracion DIAN quedo guardada en este equipo.", {
@@ -10387,9 +10825,9 @@ function bindSettingsEvents() {
 
   document.getElementById("generateDianTestInvoice")?.addEventListener("click", async () => {
     const sale = [...getActiveSales()].pop();
-    if (!sale) {
-      await showInfoDialog("Necesitas al menos una venta registrada para generar la factura electronica de prueba.", {
-        title: "Sin ventas",
+    if (!sale || !Array.isArray(sale.items) || !sale.items.length) {
+      await showInfoDialog("Necesitas al menos una venta registrada y completa con productos para generar la factura electronica de prueba.", {
+        title: "Sin venta valida",
         variant: "warn"
       });
       return;
@@ -10415,6 +10853,7 @@ function bindSettingsEvents() {
     const payload = buildDianTestInvoiceFromSale(sale, validation.config);
     state.dianConfig = validation.config;
     saveDianConfig();
+    await saveDianConfigToDb();
     state.dianTestResult = normalizeDianTestResult({
       generatedAt: payload.generatedAt,
       status: "GENERADA_LOCAL",
@@ -10425,6 +10864,7 @@ function bindSettingsEvents() {
       payload
     });
     saveDianTestResult();
+    await saveDianTestResultToDb();
     renderSettings();
 
     await showInfoDialog(`Factura de prueba ${payload.invoiceNumber} generada con base en la venta ${sale.ticketNumber}.`, {
@@ -10450,30 +10890,77 @@ function bindSettingsEvents() {
 
   document.getElementById("simulateDianSend")?.addEventListener("click", async () => {
     if (!state.dianTestResult?.payload) {
-      await showInfoDialog("Primero genera una factura de prueba antes de simular el envio.", {
+      await showInfoDialog("Primero genera una factura de prueba antes de enviarla.", {
         title: "Sin documento",
         variant: "warn"
       });
       return;
     }
 
-    const simulationId = crypto.randomUUID();
-    state.dianTestResult = normalizeDianTestResult({
-      ...state.dianTestResult,
-      simulatedAt: new Date().toISOString(),
-      status: "ENVIO_SIMULADO_OK",
-      simulationId
+    const config = normalizeDianConfig({
+      environment: document.getElementById("dianEnvironment")?.value,
+      providerMode: document.getElementById("dianProviderMode")?.value,
+      prefix: document.getElementById("dianPrefix")?.value,
+      resolution: document.getElementById("dianResolution")?.value,
+      softwareId: document.getElementById("dianSoftwareId")?.value,
+      softwarePin: document.getElementById("dianSoftwarePin")?.value,
+      certificateName: document.getElementById("dianCertificateName")?.value,
+      certificatePassword: document.getElementById("dianCertificatePassword")?.value,
+      apiUrl: document.getElementById("dianApiUrl")?.value,
+      testSetId: document.getElementById("dianTestSetId")?.value
     });
-    saveDianTestResult();
+    const validation = validateDianConfig(config);
+    if (!validation.ok) {
+      await showInfoDialog(validation.errors.join(" "), {
+        title: "Validacion DIAN",
+        variant: "warn"
+      });
+      return;
+    }
+
+    state.dianConfig = validation.config;
+    saveDianConfig();
+    await saveDianConfigToDb();
     renderSettings();
 
-    await showInfoDialog(
-      `Envio simulado correctamente. Factura ${state.dianTestResult.invoiceNumber} marcada como enviada en modo ${state.dianTestResult.environment === "production" ? "produccion" : "pruebas"}. Id simulacion: ${simulationId}.`,
-      {
-        title: "Envio simulado",
-        variant: "success"
+    setLoadingState(true, {
+      title: "Enviando factura DIAN",
+      message: "Se esta intentando enviar la factura de prueba al servicio configurado."
+    });
+
+    try {
+      const response = await sendDianInvoiceToApi(state.dianTestResult.payload, validation.config);
+      const cufeValue = String(response?.cufe || response?.cufeNumber || response?.cufe_value || response?.documentCode || response?.document_code || "").trim();
+      const qrUrlValue = String(response?.qrUrl || response?.qr_url || response?.qr || "").trim() || getDianInvoiceQrUrl(state.dianTestResult.payload);
+      state.dianTestResult = normalizeDianTestResult({
+        ...state.dianTestResult,
+        sentAt: new Date().toISOString(),
+        status: "ENVIO_REAL_OK",
+        simulationId: getRandomUuid(),
+        cufe: cufeValue,
+        qrUrl: qrUrlValue
+      });
+      saveDianTestResult();
+      await saveDianTestResultToDb();
+      renderSettings();
+      setLoadingState(false);
+
+      let successMessage = `Factura ${state.dianTestResult.invoiceNumber} enviada correctamente a ${validation.config.apiUrl}.`;
+      if (cufeValue) {
+        successMessage += ` CUFE: ${cufeValue}.`;
       }
-    );
+      await showInfoDialog(successMessage, {
+        title: "Envio completado",
+        variant: "success"
+      });
+    } catch (error) {
+      setLoadingState(false);
+      const errorMessage = error?.message || String(error || "Error desconocido").trim() || "Error desconocido";
+      await showInfoDialog(`Error al enviar la factura: ${errorMessage}`, {
+        title: "Envio fallido",
+        variant: "danger"
+      });
+    }
   });
 
   document.getElementById("resetDianConfig")?.addEventListener("click", async () => {
@@ -10685,12 +11172,12 @@ function bindLicensingEvents() {
     try {
       await withLoading(async () => {
         await saveCompanyToApi(payload);
+        resetLicensingCompanyForm();
+        renderLicensingPage();
       }, {
         title: "Guardando empresa",
         message: "Actualizando empresas en MariaDB..."
       });
-      resetLicensingCompanyForm();
-      renderLicensingPage();
     } catch (error) {
       await showInfoDialog(error.message || "No fue posible guardar la empresa.", { title: "Empresas", variant: "danger" });
     }
@@ -10988,10 +11475,9 @@ async function ensureLicenseAccess() {
   }
 
   if (!isDesktopDbEnabled()) {
-    browserStorage.removeItem(STORAGE_KEYS.session);
     browserStorage.removeItem(STORAGE_KEYS.license);
-    window.location.href = "pos.html";
-    return false;
+    persistentStorage.removeItem(STORAGE_KEYS.license);
+    return true;
   }
 
   try {

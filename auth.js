@@ -63,7 +63,7 @@ function resolveWebDbApiUrl() {
   }
 
   if (protocol === "http:" || protocol === "https:" || protocol === "file:") {
-    return "https://script.google.com/macros/s/AKfycbzHUL3P2stEDpjjbUh3pr4wGO6_KNAPv18KLz3Y8DiGuscV06esTduDmEhpe63yUqWS/exec";
+    return "https://script.google.com/macros/s/AKfycbzMavss2Ba1AYslxjJfzD5u2yVQlFUrFpV5szWizFLecGI3i5V7pKYVQjOxbUqDu8eu4A/exec";
   }
 
   return "";
@@ -71,6 +71,14 @@ function resolveWebDbApiUrl() {
 
 function isWebDbApiEnabled() {
   return Boolean(WEB_DB_API_URL);
+}
+
+function getWebDbApiLabel() {
+  return isAppsScriptWebDbUrl() ? "Google Apps Script" : "API web";
+}
+
+function shouldRequireLoginLicense() {
+  return LOGIN_SCOPE !== "internal" && Boolean(desktopDb);
 }
 
 async function fetchWebDbApi(path, payload) {
@@ -100,13 +108,13 @@ async function fetchWebDbApi(path, payload) {
     }
 
     if (!response.ok || !data?.ok) {
-      throw new Error(data?.error || "No fue posible completar la conexion con MariaDB.");
+      throw new Error(data?.error || `No fue posible completar la conexion con ${getWebDbApiLabel()}.`);
     }
 
     return data;
   } catch (error) {
     if (error instanceof TypeError) {
-      throw new Error(`No fue posible conectarse a la API web de MariaDB en ${WEB_DB_API_URL}. Verifica que el servidor este iniciado.`);
+      throw new Error(`No fue posible conectarse a ${getWebDbApiLabel()} en ${WEB_DB_API_URL}. Verifica que la implementacion este publicada con acceso para cualquier persona con el enlace.`);
     }
     throw error;
   }
@@ -114,11 +122,14 @@ async function fetchWebDbApi(path, payload) {
 
 async function fetchWebDbStatus() {
   if (!isWebDbApiEnabled()) {
-    return { ok: false, error: "No hay una API web configurada para MariaDB." };
+    return { ok: false, error: "No hay una API web configurada." };
   }
 
   try {
-    const response = await fetch(`${WEB_DB_API_URL}?action=status`, {
+    const statusUrl = isAppsScriptWebDbUrl()
+      ? `${WEB_DB_API_URL}?mode=ping`
+      : `${WEB_DB_API_URL}?action=status`;
+    const response = await fetch(statusUrl, {
       method: "GET",
       headers: { Accept: "application/json" },
       cache: "no-store"
@@ -130,13 +141,12 @@ async function fetchWebDbStatus() {
       return { ok: false, error: data?.error || "No fue posible conectarse a la API web." };
     }
 
-    // 🔥 ESTE ES EL FIX
     return { ok: true };
 
   } catch {
     return {
       ok: false,
-      error: `No fue posible conectarse a la API web de MariaDB en ${WEB_DB_API_URL}. Verifica que el servidor este iniciado.`
+      error: `No fue posible conectarse a ${getWebDbApiLabel()} en ${WEB_DB_API_URL}. Verifica que la implementacion este publicada con acceso para cualquier persona con el enlace.`
     };
   }
 }
@@ -612,6 +622,13 @@ function renderAssignedLicenseState(license) {
     return;
   }
 
+  if (!shouldRequireLoginLicense()) {
+    field.hidden = true;
+    input.value = "";
+    hint.textContent = "Ingresa con el usuario y la contrasena asignados por NubeFarma.";
+    return;
+  }
+
   if (license?.code) {
     field.hidden = true;
     input.value = String(license.code || "").trim();
@@ -622,12 +639,12 @@ function renderAssignedLicenseState(license) {
   field.hidden = Boolean(desktopDb);
   hint.textContent = desktopDb
     ? "Este equipo aun no tiene una licencia asignada. Debe activarlo un operador desde el panel de licencias."
-    : "Acceso seguro con licencia activa y usuario autorizado.";
+    : "Acceso seguro con usuario autorizado.";
 }
 
 async function validateLicenseWithApi(code) {
   if (!desktopDb && !isWebDbApiEnabled()) {
-    throw new Error("La validacion de licencias requiere la app desktop o una API web conectada a MariaDB.");
+    throw new Error("La validacion de licencias requiere la app desktop o una API web conectada.");
   }
 
   if (desktopDb) {
@@ -648,7 +665,7 @@ async function validateLicenseWithApi(code) {
 
 async function authenticateWithApi(username, password, code = "") {
   if (!desktopDb && !isWebDbApiEnabled()) {
-    throw new Error("Este acceso requiere la app desktop o una API web conectada a MariaDB.");
+    throw new Error("Este acceso requiere la app desktop o una API web conectada.");
   }
 
   if (desktopDb) {
@@ -923,7 +940,7 @@ async function setupLoginPage() {
     renderAssignedLicenseState(null);
   }
 
-  if (LOGIN_SCOPE !== "internal" && licenseInput && existingLicense?.code) {
+  if (shouldRequireLoginLicense() && licenseInput && existingLicense?.code) {
     licenseInput.value = existingLicense.code;
   }
 
@@ -940,8 +957,8 @@ async function setupLoginPage() {
     existingLicense = null;
   }
 
-  if (LOGIN_SCOPE !== "internal" && existingSession?.user && existingLicense?.code && (desktopDb || isWebDbApiEnabled())) {
-    setAuthLoadingState(true, "Validando licencia", "Comprobando licencia activa en MariaDB...");
+  if (shouldRequireLoginLicense() && existingSession?.user && existingLicense?.code && (desktopDb || isWebDbApiEnabled())) {
+    setAuthLoadingState(true, "Validando licencia", `Comprobando licencia activa en ${getWebDbApiLabel()}...`);
     validateLicenseWithApi(existingLicense.code)
       .then(() => {
         redirectToDashboard();
@@ -967,9 +984,9 @@ async function setupLoginPage() {
     setSubmitting(true);
     setAuthLoadingState(true);
 
-    const licenseCode = LOGIN_SCOPE === "internal"
-      ? ""
-      : (assignedLicense?.code || document.getElementById("loginLicense")?.value || "");
+    const licenseCode = shouldRequireLoginLicense()
+      ? (assignedLicense?.code || document.getElementById("loginLicense")?.value || "")
+      : "";
     const username = document.getElementById("loginUsername")?.value || "";
     const password = passwordInput?.value || "";
 
@@ -982,7 +999,7 @@ async function setupLoginPage() {
       } else if (isWebDbApiEnabled()) {
         const status = await fetchWebDbStatus();
         if (!status?.ok) {
-          throw new Error(status?.error || "No fue posible conectarse a MySQL/MariaDB.");
+          throw new Error(status?.error || `No fue posible conectarse a ${getWebDbApiLabel()}.`);
         }
       }
 
@@ -993,7 +1010,7 @@ async function setupLoginPage() {
       if (LOGIN_SCOPE !== "internal" && ["admin", "operador"].includes(getNormalizedRole(user.role))) {
         throw new Error("Los usuarios globales del equipo FarmaPOS solo pueden ingresar desde el acceso interno.");
       }
-      if (!["admin", "operador"].includes(getNormalizedRole(user.role))) {
+      if (shouldRequireLoginLicense() && !["admin", "operador"].includes(getNormalizedRole(user.role))) {
         const license = user.license
           || assignedLicense
           || (licenseCode ? await validateLicenseWithApi(licenseCode) : null)
@@ -1002,8 +1019,9 @@ async function setupLoginPage() {
           throw new Error("Este equipo no tiene una licencia asignada para operar.");
         }
         saveLicense(license);
-      } else {
+      } else if (["admin", "operador"].includes(getNormalizedRole(user.role)) || !shouldRequireLoginLicense()) {
         browserStorage.removeItem(LICENSE_STORAGE_KEY);
+        persistentStorage.removeItem(LICENSE_STORAGE_KEY);
       }
       saveSession(user);
       setAuthLoadingState(false);

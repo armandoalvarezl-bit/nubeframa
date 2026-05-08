@@ -3,7 +3,7 @@
   "port": 3306,
   "user": "root",
   "password": "admin",
-  "database": "db_posfarma",
+  "database": "db_posfarma_23",
   "supportApiUrl": "",
   "supportApiKey": ""
 }

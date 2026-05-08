@@ -1122,7 +1122,6 @@ function saveCompanyProfile_(sheet, profile) {
 function authenticateUser_(sheet, payload) {
   var username = String(payload.username || payload.usuario || '').trim().toLowerCase();
   var password = String(payload.password || payload.clave || '').trim();
-  var licenseCode = String(payload.code || payload.licenseCode || '').trim();
 
   if (!username) {
     throw new Error('El usuario es obligatorio.');
@@ -1144,6 +1143,9 @@ function authenticateUser_(sheet, payload) {
     var user = rowToItem_(headers, values[rowIndex]);
     var storedUsername = String(getUserField_(user, ['Usuario', 'usuario', 'USUARIO', 'User', 'user', 'Login', 'login', 'Correo', 'correo', 'Email', 'email']) || '').trim().toLowerCase();
     var storedPassword = String(getUserField_(user, ['contraseña', 'Contraseña', 'Password', 'password', 'Clave', 'clave']) || '').trim();
+    if (!storedPassword) {
+      storedPassword = String(getUserField_(user, ['contrasena', 'Contrasena', 'CONTRASENA']) || '').trim();
+    }
     var active = String(getUserField_(user, ['Estado', 'estado', 'STATUS', 'Status', 'Activo', 'activo']) || 'Activo').trim().toUpperCase();
 
     if (storedUsername !== username) continue;
@@ -1158,21 +1160,6 @@ function authenticateUser_(sheet, payload) {
 
     var role = normalizeUserRole_(getUserRole_(user, storedUsername), storedUsername);
     var companyId = String(getUserField_(user, ['EmpresaId', 'empresa_id', 'empresaid', 'CompanyId', 'companyId', 'IdEmpresa']) || '').trim();
-    var isGlobalAdmin = (role === 'admin' || role === 'operador') && !companyId;
-    var license = null;
-
-    if (!isGlobalAdmin) {
-      if (!companyId) {
-        throw new Error('El usuario no tiene una empresa asignada.');
-      }
-      if (!licenseCode) {
-        throw new Error('Debes ingresar un codigo de licencia.');
-      }
-      license = validateLicenseWeb_(licenseCode);
-      if (String(license.companyId || '').trim() !== companyId) {
-        throw new Error('La licencia no pertenece a la empresa del usuario.');
-      }
-    }
 
     return {
       ok: true,
@@ -1183,8 +1170,8 @@ function authenticateUser_(sheet, payload) {
         username: storedUsername,
         name: String(user.Nombre || storedUsername).trim(),
         role: role,
-        licenseCode: license ? String(license.code || '').trim() : '',
-        license: license
+        licenseCode: '',
+        license: null
       },
       timestamp: new Date().toISOString()
     };
@@ -1215,7 +1202,7 @@ function getUserRole_(user, username) {
 function normalizeUserRole_(role, username) {
   var value = String(role || '').trim().toLowerCase();
   var normalizedUsername = String(username || '').trim().toLowerCase();
-  var isGlobalAdminUser = normalizedUsername === 'admin' || normalizedUsername === 'administrador' || normalizedUsername === 'operador';
+  var isGlobalAdminUser = normalizedUsername === 'admin' || normalizedUsername === 'administrador' || normalizedUsername === 'operador' || normalizedUsername === 'adminweb' || normalizedUsername === 'soporte' || normalizedUsername === 'desarrollo';
 
   if (!value) return 'cajero';
   if (
